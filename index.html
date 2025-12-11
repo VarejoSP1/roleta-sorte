@@ -373,9 +373,10 @@
         
         function criarRoleta() {
             const container = document.getElementById('roletaInner');
-            const nomes = Object.keys(premios);
-            const numFatias = nomes.length;
-            const anguloFatia = 360 / numFatias;
+            // Ordem fixa dos prêmios para ter exatamente 4 fatias
+            const nomes = ['Caneta', 'Copo', 'Almofada', 'Fone'];
+            const numFatias = 4;
+            const anguloFatia = 90; // 360 / 4 = 90 graus cada fatia
             
             nomes.forEach((nome, i) => {
                 const fatia = document.createElement('div');
@@ -385,16 +386,17 @@
                 const cor = i % 2 === 0 ? '#FFFFFF' : '#DC143C';
                 
                 fatia.style.background = cor;
-                fatia.style.transform = `rotate(${anguloFatia * i}deg) skewY(${90 - anguloFatia}deg)`;
+                fatia.style.transform = `rotate(${anguloFatia * i}deg) skewY(0deg)`;
+                fatia.style.clipPath = 'polygon(50% 50%, 100% 0%, 100% 100%)';
                 
                 const conteudo = document.createElement('div');
                 conteudo.className = 'fatia-conteudo';
-                conteudo.style.transform = `skewY(${-(90 - anguloFatia)}deg) rotate(${anguloFatia / 2}deg)`;
+                conteudo.style.transform = `rotate(45deg)`;
                 
                 const texto = document.createElement('div');
                 texto.className = 'fatia-text';
                 texto.textContent = nome;
-                texto.style.transform = `translateY(-80px)`;
+                texto.style.transform = `translateY(-100px)`;
                 
                 conteudo.appendChild(texto);
                 fatia.appendChild(conteudo);
@@ -479,9 +481,9 @@
             btnGirar.classList.add('girando');
             btnGirar.textContent = '...';
             
-            const nomes = Object.keys(premios);
+            const nomes = ['Caneta', 'Copo', 'Almofada', 'Fone'];
             const indice = nomes.indexOf(premio);
-            const anguloBase = 360 / nomes.length;
+            const anguloBase = 90; // 360 / 4
             const anguloAlvo = anguloBase * indice;
             const voltas = 5 + Math.floor(Math.random() * 3);
             const rotacaoFinal = rotacaoAtual + (360 * voltas) + (360 - anguloAlvo) + (anguloBase / 2);
