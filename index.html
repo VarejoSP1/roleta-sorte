@@ -84,6 +84,11 @@ input.erro{
     font-weight:bold;
     cursor:pointer;
     margin-top:10px;
+    transition:transform 0.2s;
+}
+
+.btn:hover{
+    transform:translateY(-2px);
 }
 
 /* ROLETA */
@@ -106,6 +111,7 @@ input.erro{
     border-right:30px solid transparent;
     border-top:60px solid #ffd700;
     z-index:10;
+    filter:drop-shadow(0 4px 6px rgba(0,0,0,0.3));
 }
 
 .roleta{
@@ -118,6 +124,7 @@ input.erro{
         0 0 0 12px #D4AF37,
         0 0 0 16px #333,
         0 15px 30px rgba(0,0,0,.5);
+    overflow:hidden;
 }
 
 .roleta-inner{
@@ -129,8 +136,7 @@ input.erro{
     transition:transform 8s cubic-bezier(.17,.67,.12,.99);
 }
 
-/* FATIAS TRIANGULARES — MODELO ORIGINAL */
-
+/* GRÁFICO DE PIZZA - FATIAS ALTERNANDO VERMELHO E BRANCO */
 .fatia{
     position:absolute;
     width:50%;
@@ -150,6 +156,7 @@ input.erro{
     color:#000;
     white-space:nowrap;
     transform-origin:left top;
+    text-shadow:1px 1px 2px rgba(255,255,255,0.8);
 }
 
 /* BOTÃO CENTRAL */
@@ -172,6 +179,22 @@ input.erro{
     font-weight:bold;
     cursor:pointer;
     z-index:20;
+    box-shadow:0 6px 20px rgba(0,0,0,0.3);
+    transition:transform 0.3s;
+}
+
+.centro:hover{
+    transform:translate(-50%,-50%) scale(1.05);
+}
+
+.centro.girando{
+    animation:pulsar 1s infinite;
+}
+
+@keyframes pulsar{
+    0%{ transform:translate(-50%,-50%) scale(1); }
+    50%{ transform:translate(-50%,-50%) scale(0.95); }
+    100%{ transform:translate(-50%,-50%) scale(1); }
 }
 
 /* RESULTADO */
@@ -188,10 +211,25 @@ input.erro{
 .resultado-premio{
     font-size:40px;
     font-weight:900;
-    color:#667eea;
+    color:#8b0000;
     margin:20px 0;
+    text-shadow:2px 2px 4px rgba(0,0,0,0.1);
 }
 
+.contador{
+    text-align:center;
+    margin-top:20px;
+    font-size:14px;
+    color:#666;
+    background:#f8f9fa;
+    padding:10px;
+    border-radius:8px;
+}
+
+.contador span{
+    font-weight:bold;
+    color:#8b0000;
+}
 </style>
 </head>
 
@@ -260,6 +298,14 @@ input.erro{
 
     </div>
 
+    <div class="contador">
+        Prêmios restantes: 
+        <span id="contadorCaneta">600</span> canetas | 
+        <span id="contadorCopo">100</span> copos | 
+        <span id="contadorAlmofada">50</span> almofadas | 
+        <span id="contadorFone">50</span> fones
+    </div>
+
 </div>
 
 <!-- RESULTADO -->
@@ -277,18 +323,20 @@ input.erro{
 /* GOOGLE SHEETS */
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzojpuOhfwH1TfSKe0ITynGAVVa4xVQwwneCUvw1A5wqdbf-jhag_CvFHyaBxCWObYgsw/exec";
 
-/* FATIAS — MODELO ORIGINAL */
+/* FATIAS - GRÁFICO DE PIZZA COM VERMELHO E BRANCO */
 const PRIZES = ["CANETA","COPO","ALMOFADA","FONE"];
-const ANGLE = 90; /* 4 fatias = 360/4 */
-let currentRotation = 0;
-let spinning = false;
+const COLORS = ["#FF0000", "#FFFFFF", "#FF0000", "#FFFFFF"]; // Alternando vermelho e branco
+const TEXT_COLORS = ["#FFFFFF", "#000000", "#FFFFFF", "#000000"]; // Texto branco no vermelho, preto no branco
 
 let premios = {
-    "Caneta": {peso:85,total:600,distribuidos:0},
-    "Copo": {peso:5,total:100,distribuidos:0},
-    "Almofada": {peso:5,total:50,distribuidos:0},
-    "Fone": {peso:5,total:50,distribuidos:0}
+    "CANETA": {peso:85,total:600,distribuidos:0},
+    "COPO": {peso:5,total:100,distribuidos:0},
+    "ALMOFADA": {peso:5,total:50,distribuidos:0},
+    "FONE": {peso:5,total:50,distribuidos:0}
 };
+
+let currentRotation = 0;
+let spinning = false;
 
 /* Máscaras */
 telefone.addEventListener("input", e=>{
@@ -304,49 +352,73 @@ cep.addEventListener("input", e=>{
     e.target.value=v;
 });
 
-function buildWheel(){
-    const inner=document.getElementById("roletaInner");
-    inner.innerHTML="";
+function construirGraficoPizza(){
+    const inner = document.getElementById("roletaInner");
+    inner.innerHTML = "";
     
-    // Proporções reais: Caneta 85%, outros 5% cada
+    // Proporções: Caneta 85%, outros 5% cada
     const proporcoes = [85, 5, 5, 5]; // Total = 100%
-    const cores = ["#FF6B6B", "#4ECDC4", "#FFD166", "#6A0572"];
-    
     let anguloAtual = 0;
     
-    PRIZES.forEach((p, i) => {
-        const porcentagem = proporcoes[i];
+    PRIZES.forEach((premio, index) => {
+        const porcentagem = proporcoes[index];
         const anguloFatia = (porcentagem / 100) * 360;
         
+        // Criar elemento da fatia
         let fatia = document.createElement("div");
         fatia.className = "fatia";
-        fatia.style.background = cores[i];
+        fatia.style.background = COLORS[index];
+        fatia.style.border = COLORS[index] === "#FFFFFF" ? "1px solid #ccc" : "none"; // Borda nas brancas
+        
+        // Posicionar e rotacionar a fatia
+        fatia.style.transform = `rotate(${anguloAtual}deg)`;
         fatia.style.transformOrigin = "0 0";
-        fatia.style.position = "absolute";
-        fatia.style.width = "50%";
-        fatia.style.height = "50%";
-        fatia.style.left = "50%";
-        fatia.style.top = "50%";
         
-        // Calcular o skew baseado no ângulo da fatia
-        const skewAngle = 90 - anguloFatia;
-        fatia.style.transform = `rotate(${anguloAtual}deg) skewY(-${skewAngle}deg)`;
+        // Criar texto da fatia
+        let texto = document.createElement("div");
+        texto.className = "fatia-text";
+        texto.textContent = `${premio} (${porcentagem}%)`;
+        texto.style.color = TEXT_COLORS[index];
+        texto.style.fontWeight = "bold";
+        texto.style.fontSize = "16px";
         
-        let txt = document.createElement("div");
-        txt.className = "fatia-text";
-        txt.textContent = p;
-        txt.style.color = "#FFF";
-        txt.style.textShadow = "2px 2px 4px rgba(0,0,0,0.8)";
-        txt.style.transform = `skewY(${skewAngle}deg) rotate(${anguloFatia/2}deg)`;
+        // Posicionar o texto no centro da fatia
+        const anguloTexto = anguloAtual + (anguloFatia / 2);
+        texto.style.transform = `rotate(${anguloTexto}deg) translate(120px) rotate(-${anguloTexto}deg)`;
         
-        fatia.appendChild(txt);
+        fatia.appendChild(texto);
         inner.appendChild(fatia);
         
         anguloAtual += anguloFatia;
     });
+    
+    // Adicionar linha divisória entre as fatias
+    for(let i = 0; i < 4; i++) {
+        const angulo = (85/100*360*i + (i>0?5/100*360*(i-1):0));
+        const linha = document.createElement("div");
+        linha.style.position = "absolute";
+        linha.style.width = "50%";
+        linha.style.height = "2px";
+        linha.style.background = "#333";
+        linha.style.left = "50%";
+        linha.style.top = "50%";
+        linha.style.transformOrigin = "0 0";
+        linha.style.transform = `rotate(${angulo}deg)`;
+        inner.appendChild(linha);
+    }
 }
 
-window.onload = buildWheel;
+function atualizarContadores(){
+    document.getElementById("contadorCaneta").textContent = premios.CANETA.total - premios.CANETA.distribuidos;
+    document.getElementById("contadorCopo").textContent = premios.COPO.total - premios.COPO.distribuidos;
+    document.getElementById("contadorAlmofada").textContent = premios.ALMOFADA.total - premios.ALMOFADA.distribuidos;
+    document.getElementById("contadorFone").textContent = premios.FONE.total - premios.FONE.distribuidos;
+}
+
+window.onload = function() {
+    construirGraficoPizza();
+    atualizarContadores();
+};
 
 /* Validar */
 function validar(id,err){
@@ -366,10 +438,10 @@ function validar(id,err){
 /* Avançar */
 function avancarParaRoleta(){
     const ok =
-        validar("nome","errNome") &
-        validar("telefone","errTel") &
-        validar("cep","errCep") &
-        validar("rua","errRua") &
+        validar("nome","errNome") &&
+        validar("telefone","errTel") &&
+        validar("cep","errCep") &&
+        validar("rua","errRua") &&
         validar("numero","errNum");
 
     if(!ok) return;
@@ -397,7 +469,7 @@ function girarRoleta(){
     if(spinning) return;
 
     let premio=sortear();
-    let idx=PRIZES.indexOf(premio.toUpperCase());
+    let idx=PRIZES.indexOf(premio);
     
     // Proporções para calcular ângulos corretos
     const proporcoes = [85, 5, 5, 5];
@@ -416,14 +488,16 @@ function girarRoleta(){
     btnGirar.classList.add("girando");
     btnGirar.textContent="...";
 
-    let finalRotation = currentRotation + 720 + (360 - anguloCentro);
+    // Giro com rotação extra para efeito visual
+    let finalRotation = currentRotation + 1440 + (360 - anguloCentro);
     roletaInner.style.transform = `rotate(${finalRotation}deg)`;
     currentRotation = finalRotation % 360;
 
     setTimeout(()=>{
-
         premios[premio].distribuidos++;
+        atualizarContadores();
 
+        // Enviar dados para Google Sheets
         fetch(SCRIPT_URL, {
             method:"POST",
             mode:"no-cors",
@@ -438,7 +512,7 @@ function girarRoleta(){
                 premio,
                 data:new Date().toLocaleString("pt-BR")
             })
-        });
+        }).catch(err => console.log("Erro ao enviar:", err));
 
         premioGanho.textContent=premio;
 
