@@ -84,11 +84,6 @@ input.erro{
     font-weight:bold;
     cursor:pointer;
     margin-top:10px;
-    transition:transform 0.2s;
-}
-
-.btn:hover{
-    transform:translateY(-2px);
 }
 
 /* ROLETA */
@@ -111,7 +106,6 @@ input.erro{
     border-right:30px solid transparent;
     border-top:60px solid #ffd700;
     z-index:10;
-    filter:drop-shadow(0 4px 6px rgba(0,0,0,0.3));
 }
 
 .roleta{
@@ -124,7 +118,6 @@ input.erro{
         0 0 0 12px #D4AF37,
         0 0 0 16px #333,
         0 15px 30px rgba(0,0,0,.5);
-    overflow:hidden;
 }
 
 .roleta-inner{
@@ -136,7 +129,8 @@ input.erro{
     transition:transform 8s cubic-bezier(.17,.67,.12,.99);
 }
 
-/* GRÁFICO DE PIZZA - FATIAS ALTERNANDO VERMELHO E BRANCO */
+/* FATIAS TRIANGULARES — MODELO ORIGINAL */
+
 .fatia{
     position:absolute;
     width:50%;
@@ -144,15 +138,18 @@ input.erro{
     left:50%;
     top:50%;
     transform-origin:0 0;
-    /* Removido clip-path para usar método de conic-gradient */
+    clip-path:polygon(0 0,100% 0,0 100%);
 }
 
 .fatia-text{
     position:absolute;
+    left:20px;
+    top:20px;
     font-weight:bold;
     font-size:18px;
+    color:#000;
     white-space:nowrap;
-    z-index:2;
+    transform-origin:left top;
 }
 
 /* BOTÃO CENTRAL */
@@ -175,22 +172,6 @@ input.erro{
     font-weight:bold;
     cursor:pointer;
     z-index:20;
-    box-shadow:0 6px 20px rgba(0,0,0,0.3);
-    transition:transform 0.3s;
-}
-
-.centro:hover{
-    transform:translate(-50%,-50%) scale(1.05);
-}
-
-.centro.girando{
-    animation:pulsar 1s infinite;
-}
-
-@keyframes pulsar{
-    0%{ transform:translate(-50%,-50%) scale(1); }
-    50%{ transform:translate(-50%,-50%) scale(0.95); }
-    100%{ transform:translate(-50%,-50%) scale(1); }
 }
 
 /* RESULTADO */
@@ -207,25 +188,10 @@ input.erro{
 .resultado-premio{
     font-size:40px;
     font-weight:900;
-    color:#8b0000;
+    color:#667eea;
     margin:20px 0;
-    text-shadow:2px 2px 4px rgba(0,0,0,0.1);
 }
 
-.contador{
-    text-align:center;
-    margin-top:20px;
-    font-size:14px;
-    color:#666;
-    background:#f8f9fa;
-    padding:10px;
-    border-radius:8px;
-}
-
-.contador span{
-    font-weight:bold;
-    color:#8b0000;
-}
 </style>
 </head>
 
@@ -287,21 +253,11 @@ input.erro{
         <div class="seta"></div>
 
         <div class="roleta">
-            <!-- Vamos usar canvas para um gráfico de pizza mais preciso -->
-            <canvas id="roletaCanvas" width="380" height="380"></canvas>
             <div id="roletaInner" class="roleta-inner"></div>
         </div>
 
         <div id="btnGirar" class="centro" onclick="girarRoleta()">GIRAR</div>
 
-    </div>
-
-    <div class="contador">
-        Prêmios restantes: 
-        <span id="contadorCaneta">600</span> canetas | 
-        <span id="contadorCopo">100</span> copos | 
-        <span id="contadorAlmofada">50</span> almofadas | 
-        <span id="contadorFone">50</span> fones
     </div>
 
 </div>
@@ -321,20 +277,18 @@ input.erro{
 /* GOOGLE SHEETS */
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzojpuOhfwH1TfSKe0ITynGAVVa4xVQwwneCUvw1A5wqdbf-jhag_CvFHyaBxCWObYgsw/exec";
 
-/* FATIAS - GRÁFICO DE PIZZA COM VERMELHO E BRANCO */
+/* FATIAS — MODELO ORIGINAL */
 const PRIZES = ["CANETA","COPO","ALMOFADA","FONE"];
-const COLORS = ["#FF0000", "#FFFFFF", "#FF0000", "#FFFFFF"]; // Alternando vermelho e branco
-const TEXT_COLORS = ["#FFFFFF", "#000000", "#FFFFFF", "#000000"]; // Texto branco no vermelho, preto no branco
-
-let premios = {
-    "CANETA": {peso:85,total:600,distribuidos:0},
-    "COPO": {peso:5,total:100,distribuidos:0},
-    "ALMOFADA": {peso:5,total:50,distribuidos:0},
-    "FONE": {peso:5,total:50,distribuidos:0}
-};
-
+const ANGLE = 90; /* 4 fatias = 360/4 */
 let currentRotation = 0;
 let spinning = false;
+
+let premios = {
+    "Caneta": {peso:85,total:600,distribuidos:0},
+    "Copo": {peso:5,total:100,distribuidos:0},
+    "Almofada": {peso:5,total:50,distribuidos:0},
+    "Fone": {peso:5,total:50,distribuidos:0}
+};
 
 /* Máscaras */
 telefone.addEventListener("input", e=>{
@@ -350,141 +304,28 @@ cep.addEventListener("input", e=>{
     e.target.value=v;
 });
 
-function desenharGraficoPizza() {
-    const canvas = document.getElementById("roletaCanvas");
-    const ctx = canvas.getContext("2d");
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-    const radius = canvas.width / 2 - 10;
-    
-    // Limpar canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // Desenhar fundo dourado
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-    ctx.fillStyle = '#D4AF37';
-    ctx.fill();
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = '#333';
-    ctx.stroke();
-    
-    // Desenhar fatias do gráfico de pizza
-    const proporcoes = [85, 5, 5, 5]; // Caneta 85%, outros 5% cada
-    let startAngle = 0;
-    
-    for(let i = 0; i < 4; i++) {
-        const sliceAngle = (proporcoes[i] / 100) * (Math.PI * 2);
-        const endAngle = startAngle + sliceAngle;
-        
-        // Desenhar fatia
-        ctx.beginPath();
-        ctx.moveTo(centerX, centerY);
-        ctx.arc(centerX, centerY, radius - 12, startAngle, endAngle);
-        ctx.closePath();
-        
-        // Preencher com cor alternada
-        ctx.fillStyle = COLORS[i];
-        ctx.fill();
-        
-        // Borda da fatia
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = '#333';
-        ctx.stroke();
-        
-        // Desenhar texto
-        const midAngle = startAngle + sliceAngle / 2;
-        const textRadius = radius * 0.6;
-        const textX = centerX + Math.cos(midAngle) * textRadius;
-        const textY = centerY + Math.sin(midAngle) * textRadius;
-        
-        ctx.save();
-        ctx.translate(textX, textY);
-        
-        // Rotacionar texto para ficar legível
-        if (midAngle > Math.PI/2 && midAngle < 3*Math.PI/2) {
-            ctx.rotate(midAngle + Math.PI);
-        } else {
-            ctx.rotate(midAngle);
-        }
-        
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.font = 'bold 16px Arial';
-        ctx.fillStyle = TEXT_COLORS[i];
-        
-        // Nome do prêmio
-        ctx.fillText(PRIZES[i], 0, 0);
-        
-        // Porcentagem
-        ctx.font = '14px Arial';
-        ctx.fillText(`${proporcoes[i]}%`, 0, 20);
-        
-        ctx.restore();
-        
-        startAngle = endAngle;
-    }
-    
-    // Desenhar círculo central
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, 55, 0, Math.PI * 2);
-    ctx.fillStyle = '#FFD700';
-    ctx.fill();
-    ctx.lineWidth = 4;
-    ctx.strokeStyle = '#D4AF37';
-    ctx.stroke();
+function buildWheel(){
+    const inner=document.getElementById("roletaInner");
+    inner.innerHTML="";
+
+    PRIZES.forEach((p,i)=>{
+        let fatia=document.createElement("div");
+        fatia.className="fatia";
+
+        fatia.style.background = (i%2===0) ? "#fff" : "#dc143c";
+        fatia.style.transform = `rotate(${i*ANGLE}deg) skewY(-45deg)`;
+
+        let txt=document.createElement("div");
+        txt.className="fatia-text";
+        txt.textContent=p;
+        txt.style.transform = `skewY(45deg) rotate(45deg)`;
+
+        fatia.appendChild(txt);
+        inner.appendChild(fatia);
+    });
 }
 
-function construirGraficoPizza() {
-    const inner = document.getElementById("roletaInner");
-    inner.innerHTML = "";
-    
-    // Desenhar no canvas
-    desenharGraficoPizza();
-    
-    // Manter o elemento rotacionável para a animação
-    inner.style.transform = `rotate(0deg)`;
-    
-    // Adicionar elementos de texto flutuante para compatibilidade
-    const proporcoes = [85, 5, 5, 5];
-    let anguloAcumulado = 0;
-    
-    for(let i = 0; i < 4; i++) {
-        const anguloFatia = (proporcoes[i] / 100) * 360;
-        const anguloCentro = anguloAcumulado + (anguloFatia / 2);
-        
-        let texto = document.createElement("div");
-        texto.className = "fatia-text";
-        texto.textContent = PRIZES[i];
-        texto.style.color = TEXT_COLORS[i];
-        
-        // Posicionar texto
-        const raio = 120;
-        const rad = (anguloCentro * Math.PI) / 180;
-        const x = 190 + Math.cos(rad) * raio - 40;
-        const y = 190 + Math.sin(rad) * raio - 15;
-        
-        texto.style.left = x + "px";
-        texto.style.top = y + "px";
-        texto.style.transform = `rotate(${anguloCentro}deg)`;
-        
-        inner.appendChild(texto);
-        
-        anguloAcumulado += anguloFatia;
-    }
-}
-
-function atualizarContadores(){
-    document.getElementById("contadorCaneta").textContent = premios.CANETA.total - premios.CANETA.distribuidos;
-    document.getElementById("contadorCopo").textContent = premios.COPO.total - premios.COPO.distribuidos;
-    document.getElementById("contadorAlmofada").textContent = premios.ALMOFADA.total - premios.ALMOFADA.distribuidos;
-    document.getElementById("contadorFone").textContent = premios.FONE.total - premios.FONE.distribuidos;
-}
-
-window.onload = function() {
-    construirGraficoPizza();
-    atualizarContadores();
-};
+window.onload = buildWheel;
 
 /* Validar */
 function validar(id,err){
@@ -504,10 +345,10 @@ function validar(id,err){
 /* Avançar */
 function avancarParaRoleta(){
     const ok =
-        validar("nome","errNome") &&
-        validar("telefone","errTel") &&
-        validar("cep","errCep") &&
-        validar("rua","errRua") &&
+        validar("nome","errNome") &
+        validar("telefone","errTel") &
+        validar("cep","errCep") &
+        validar("rua","errRua") &
         validar("numero","errNum");
 
     if(!ok) return;
@@ -535,35 +376,20 @@ function girarRoleta(){
     if(spinning) return;
 
     let premio=sortear();
-    let idx=PRIZES.indexOf(premio);
-    
-    // Proporções para calcular ângulos corretos
-    const proporcoes = [85, 5, 5, 5];
-    
-    // Calcular ângulo acumulado até o prêmio
-    let anguloAcumulado = 0;
-    for(let i = 0; i < idx; i++){
-        anguloAcumulado += (proporcoes[i] / 100) * 360;
-    }
-    
-    // Ângulo do centro da fatia sorteada
-    const anguloFatia = (proporcoes[idx] / 100) * 360;
-    const anguloCentro = anguloAcumulado + (anguloFatia / 2);
+    let idx=PRIZES.indexOf(premio.toUpperCase());
 
     spinning=true;
     btnGirar.classList.add("girando");
     btnGirar.textContent="...";
 
-    // Giro com rotação extra para efeito visual
-    let finalRotation = currentRotation + 1440 + (360 - anguloCentro);
+    let finalRotation = currentRotation + 720 + (360 - (idx*ANGLE) - ANGLE/2);
     roletaInner.style.transform = `rotate(${finalRotation}deg)`;
     currentRotation = finalRotation % 360;
 
     setTimeout(()=>{
-        premios[premio].distribuidos++;
-        atualizarContadores();
 
-        // Enviar dados para Google Sheets
+        premios[premio].distribuidos++;
+
         fetch(SCRIPT_URL, {
             method:"POST",
             mode:"no-cors",
@@ -578,7 +404,7 @@ function girarRoleta(){
                 premio,
                 data:new Date().toLocaleString("pt-BR")
             })
-        }).catch(err => console.log("Erro ao enviar:", err));
+        });
 
         premioGanho.textContent=premio;
 
