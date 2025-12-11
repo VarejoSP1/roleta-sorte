@@ -1,366 +1,440 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Roleta da Sorte - Ajustada Final</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roleta da Sorte</title>
 
 <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
 
-    body {
-        font-family: "Segoe UI", sans-serif;
-        background: linear-gradient(135deg, #8b0000, #b22222); /* vermelho escuro */
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-    }
+body{
+    font-family:'Segoe UI',sans-serif;
+    background:linear-gradient(135deg,#8b0000,#b22222);
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+}
 
-    .container {
-        width: 520px;
-        background: #fff;
-        padding: 30px;
-        border-radius: 20px;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
-    }
+.container{
+    width:520px;
+    background:white;
+    padding:30px;
+    border-radius:20px;
+    box-shadow:0 20px 50px rgba(0,0,0,.3);
+}
 
-    h1 { text-align: center; margin-bottom: 10px; color: #333; }
-    .subtitle { text-align: center; color: #666; margin-bottom: 20px; }
+/* FORM */
 
-    .form-group { margin-bottom: 15px; }
-    label { font-weight: 600; color: #333; }
+h1{
+    text-align:center;
+    color:#333;
+    margin-bottom:10px;
+}
 
-    input {
-        width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 10px;
-        margin-top: 5px; font-size: 16px;
-    }
-    input.erro { border-color: #dc3545; }
-    .msg-erro { color: #dc3545; display: none; font-size: 14px; margin-top: 4px; }
+.subtitle{
+    text-align:center;
+    color:#666;
+    margin-bottom:20px;
+}
 
-    .btn {
-        width: 100%; padding: 15px;
-        background: linear-gradient(135deg, #8b0000, #b22222);
-        border: none; border-radius: 12px; color: #fff;
-        font-weight: 700; cursor: pointer; font-size: 17px;
-        margin-top: 10px;
-    }
+.form-group{
+    margin-bottom:15px;
+}
 
-    .roleta-wrapper { width: 380px; height: 380px; margin: 20px auto; position: relative; }
+label{
+    font-weight:600;
+    color:#333;
+}
 
-    .seta {
-        position: absolute;
-        top: -40px; left: 50%; transform: translateX(-50%);
-        width: 0; height: 0;
-        border-left: 30px solid transparent;
-        border-right: 30px solid transparent;
-        border-top: 60px solid #ffd700;
-        z-index: 9999;
-    }
+input{
+    width:100%;
+    padding:10px;
+    border:2px solid #ddd;
+    border-radius:10px;
+    font-size:16px;
+    margin-top:5px;
+}
 
-    .roleta-inner {
-        width: 100%; height: 100%; border-radius: 50%;
-        transition: transform 8s cubic-bezier(.17,.67,.12,.99);
-        position: relative; overflow: visible;
-        box-shadow: 0 0 0 12px #d4af37, 0 0 0 16px #333;
-    }
+input.erro{
+    border-color:#dc3545;
+}
 
-    .slice-label {
-        position: absolute;
-        left: 50%; top: 50%;
-        transform-origin: center center;
-        font-size: 16px; font-weight: 800;
-        white-space: nowrap; pointer-events: none;
-        color: #000; z-index: 9999;
-        max-width: 120px; text-align: center;
-        overflow: hidden; text-overflow: ellipsis;
-    }
+.msg-erro{
+    color:#dc3545;
+    font-size:14px;
+    display:none;
+    margin-top:5px;
+}
 
-    .centro {
-        position: absolute; left: 50%; top: 50%;
-        transform: translate(-50%, -50%);
-        width: 110px; height: 110px;
-        background: radial-gradient(circle, #ffd700, #ffa500, #ff8c00);
-        border-radius: 50%; border: 4px solid #d4af37;
-        display: flex; align-items: center; justify-content: center;
-        font-weight: 900; color: #fff; cursor: pointer; font-size: 18px;
-        z-index: 9999;
-    }
+.btn{
+    width:100%;
+    padding:15px;
+    background:linear-gradient(135deg,#8b0000,#b22222);
+    color:white;
+    border:none;
+    border-radius:12px;
+    font-size:18px;
+    font-weight:bold;
+    cursor:pointer;
+    margin-top:10px;
+}
 
-    .centro.girando { opacity: 0.7; pointer-events: none; }
+/* ROLETA */
 
-    .resultado { text-align: center; display: none; }
-    .resultado.show { display: block; }
+.roleta-wrapper{
+    width:380px;
+    height:380px;
+    margin:20px auto;
+    position:relative;
+}
 
-    .resultado-premio {
-        font-size: 42px;
-        font-weight: 900;
-        color: #667eea;
-        margin: 20px 0;
-    }
+.seta{
+    position:absolute;
+    top:-40px;
+    left:50%;
+    transform:translateX(-50%);
+    width:0;
+    height:0;
+    border-left:30px solid transparent;
+    border-right:30px solid transparent;
+    border-top:60px solid #ffd700;
+    z-index:10;
+}
+
+.roleta{
+    width:100%;
+    height:100%;
+    border-radius:50%;
+    position:relative;
+    background:white;
+    box-shadow:
+        0 0 0 12px #D4AF37,
+        0 0 0 16px #333,
+        0 15px 30px rgba(0,0,0,.5);
+}
+
+.roleta-inner{
+    width:100%;
+    height:100%;
+    border-radius:50%;
+    position:relative;
+    overflow:hidden;
+    transition:transform 8s cubic-bezier(.17,.67,.12,.99);
+}
+
+/* FATIAS TRIANGULARES — MODELO ORIGINAL */
+
+.fatia{
+    position:absolute;
+    width:50%;
+    height:50%;
+    left:50%;
+    top:50%;
+    transform-origin:0 0;
+    clip-path:polygon(0 0,100% 0,0 100%);
+}
+
+.fatia-text{
+    position:absolute;
+    left:20px;
+    top:20px;
+    font-weight:bold;
+    font-size:18px;
+    color:#000;
+    white-space:nowrap;
+    transform-origin:left top;
+}
+
+/* BOTÃO CENTRAL */
+
+.centro{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    width:110px;
+    height:110px;
+    border-radius:50%;
+    background:radial-gradient(circle,#FFD700,#FFA500,#FF8C00);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:4px solid #D4AF37;
+    font-size:20px;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+    z-index:20;
+}
+
+/* RESULTADO */
+
+.resultado{
+    text-align:center;
+    display:none;
+}
+
+.resultado.show{
+    display:block;
+}
+
+.resultado-premio{
+    font-size:40px;
+    font-weight:900;
+    color:#667eea;
+    margin:20px 0;
+}
+
 </style>
 </head>
 
 <body>
+
 <div class="container">
 
-    <!-- FORMULÁRIO -->
-    <div id="formulario">
-        <h1>Roleta da Sorte</h1>
-        <p class="subtitle">Preencha seus dados para girar!</p>
+<!-- FORMULÁRIO -->
+<div id="formulario">
 
-        <div class="form-group">
-            <label>Nome *</label>
-            <input id="nome" />
-            <div id="errNome" class="msg-erro">Preencha o nome</div>
-        </div>
+    <h1>Roleta da Sorte</h1>
+    <p class="subtitle">Preencha seus dados para girar!</p>
 
-        <div class="form-group">
-            <label>Telefone *</label>
-            <input id="telefone" maxlength="15" />
-            <div id="errTel" class="msg-erro">Preencha o telefone</div>
-        </div>
-
-        <div class="form-group">
-            <label>CEP *</label>
-            <input id="cep" maxlength="9" />
-            <div id="errCep" class="msg-erro">Preencha o CEP</div>
-        </div>
-
-        <div class="form-group">
-            <label>Rua *</label>
-            <input id="rua" />
-            <div id="errRua" class="msg-erro">Preencha a rua</div>
-        </div>
-
-        <div class="form-group">
-            <label>Número *</label>
-            <input id="numero" />
-            <div id="errNum" class="msg-erro">Preencha o número</div>
-        </div>
-
-        <!-- COMPLEMENTO -->
-        <div class="form-group">
-            <label>Complemento (opcional)</label>
-            <input id="complemento" />
-        </div>
-
-        <button class="btn" onclick="avancarParaRoleta()">Girar a Roleta!</button>
+    <div class="form-group">
+        <label>Nome *</label>
+        <input id="nome">
+        <div id="errNome" class="msg-erro">Preencha o nome</div>
     </div>
 
-    <!-- ROLETA -->
-    <div id="roletaArea" style="display:none">
-        <h1 id="saudacao" style="text-align:center;margin-bottom:10px"></h1>
-
-        <div class="roleta-wrapper">
-            <div class="seta"></div>
-            <div class="roleta">
-                <div id="roletaInner" class="roleta-inner"></div>
-            </div>
-            <div id="btnGirar" class="centro" onclick="girarRoleta()">GIRAR</div>
-        </div>
+    <div class="form-group">
+        <label>Telefone *</label>
+        <input id="telefone" maxlength="15">
+        <div id="errTel" class="msg-erro">Preencha o telefone</div>
     </div>
 
-    <!-- RESULTADO -->
-    <div id="resultado" class="resultado">
-        <h2>Parabéns!</h2>
-        <p>Você ganhou:</p>
-        <div id="premioGanho" class="resultado-premio"></div>
+    <div class="form-group">
+        <label>CEP *</label>
+        <input id="cep" maxlength="9">
+        <div id="errCep" class="msg-erro">Preencha o CEP</div>
+    </div>
 
-        <button class="btn" onclick="reiniciar()">Próximo participante</button>
+    <div class="form-group">
+        <label>Rua *</label>
+        <input id="rua">
+        <div id="errRua" class="msg-erro">Preencha a rua</div>
+    </div>
+
+    <div class="form-group">
+        <label>Número *</label>
+        <input id="numero">
+        <div id="errNum" class="msg-erro">Preencha o número</div>
+    </div>
+
+    <div class="form-group">
+        <label>Complemento (opcional)</label>
+        <input id="complemento">
+    </div>
+
+    <button class="btn" onclick="avancarParaRoleta()">Girar a Roleta!</button>
+</div>
+
+<!-- ROLETA -->
+<div id="roletaArea" style="display:none">
+
+    <h1 id="saudacao" style="text-align:center;margin-bottom:10px"></h1>
+
+    <div class="roleta-wrapper">
+
+        <div class="seta"></div>
+
+        <div class="roleta">
+            <div id="roletaInner" class="roleta-inner"></div>
+        </div>
+
+        <div id="btnGirar" class="centro" onclick="girarRoleta()">GIRAR</div>
+
     </div>
 
 </div>
 
+<!-- RESULTADO -->
+<div id="resultado" class="resultado">
+    <h2>Parabéns!</h2>
+    <p>Você ganhou:</p>
+    <div id="premioGanho" class="resultado-premio"></div>
+    <button class="btn" onclick="reiniciar()">Próximo participante</button>
+</div>
+
+</div>
+
 <script>
-/* URL do Google Sheets */
+
+/* GOOGLE SHEETS */
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzojpuOhfwH1TfSKe0ITynGAVVa4xVQwwneCUvw1A5wqdbf-jhag_CvFHyaBxCWObYgsw/exec";
 
-const DURATION_MS = 8000;
-const NAMES = ["CANETA","COPO","ALMOFADA","FONE"];
-const ANGLE = 360 / NAMES.length;
-
+/* FATIAS — MODELO ORIGINAL */
+const PRIZES = ["CANETA","COPO","ALMOFADA","FONE"];
+const ANGLE = 90; /* 4 fatias = 360/4 */
 let currentRotation = 0;
 let spinning = false;
-let formData = {};
 
-/* PROBABILIDADES AJUSTADAS */
 let premios = {
-    "Caneta": { total: 600, distribuidos: 0, peso: 85 },
-    "Copo": { total: 100, distribuidos: 0, peso: 5 },
-    "Almofada": { total: 50, distribuidos: 0, peso: 5 },
-    "Fone": { total: 50, distribuidos: 0, peso: 5 }
+    "Caneta": {peso:85,total:600,distribuidos:0},
+    "Copo": {peso:5,total:100,distribuidos:0},
+    "Almofada": {peso:5,total:50,distribuidos:0},
+    "Fone": {peso:5,total:50,distribuidos:0}
 };
 
 /* Máscaras */
-telefone.addEventListener("input", e => {
-    let v = e.target.value.replace(/\D/g, "");
-    if (v.length > 2) v = v.replace(/^(\d{2})(\d)/, "($1) $2");
-    if (v.length > 7) v = v.replace(/(\d)(\d{4})$/, "$1-$2");
-    e.target.value = v;
+telefone.addEventListener("input", e=>{
+    let v=e.target.value.replace(/\D/g,'');
+    if(v.length>2) v=v.replace(/^(\d{2})(\d)/,"($1) $2");
+    if(v.length>7) v=v.replace(/(\d)(\d{4})$/,"$1-$2");
+    e.target.value=v;
 });
 
-cep.addEventListener("input", e => {
-    let v = e.target.value.replace(/\D/g, "");
-    if (v.length > 5) v = v.replace(/^(\d{5})(\d)/, "$1-$2");
-    e.target.value = v;
+cep.addEventListener("input", e=>{
+    let v=e.target.value.replace(/\D/g,'');
+    if(v.length>5) v=v.replace(/^(\d{5})(\d)/,"$1-$2");
+    e.target.value=v;
 });
 
-/* Montar Roleta */
-function buildWheel() {
-    const inner = document.getElementById("roletaInner");
-    inner.innerHTML = "";
+function buildWheel(){
+    const inner=document.getElementById("roletaInner");
+    inner.innerHTML="";
 
-    const slices = NAMES.map((_, i) => {
-        const start = i * ANGLE;
-        const end = start + ANGLE;
-        const color = i % 2 === 0 ? "#FFF" : "#DC143C";
-        return `${color} ${start}deg ${end}deg`;
-    });
+    PRIZES.forEach((p,i)=>{
+        let fatia=document.createElement("div");
+        fatia.className="fatia";
 
-    inner.style.background = `conic-gradient(from -90deg, ${slices.join(", ")})`;
+        fatia.style.background = (i%2===0) ? "#fff" : "#dc143c";
+        fatia.style.transform = `rotate(${i*ANGLE}deg) skewY(-45deg)`;
 
-    const distance = 110;
+        let txt=document.createElement("div");
+        txt.className="fatia-text";
+        txt.textContent=p;
+        txt.style.transform = `skewY(45deg) rotate(45deg)`;
 
-    NAMES.forEach((name, i) => {
-        const label = document.createElement("div");
-        label.className = "slice-label";
-        label.textContent = name;
-
-        const angle = -90 + (i * ANGLE) + (ANGLE / 2);
-
-        label.style.transform = `
-            rotate(${angle}deg)
-            translateY(-${distance}px)
-            rotate(${-angle}deg)
-        `;
-
-        inner.appendChild(label);
+        fatia.appendChild(txt);
+        inner.appendChild(fatia);
     });
 }
 
 window.onload = buildWheel;
 
 /* Validar */
-function validar(id, err) {
-    const el = document.getElementById(id);
-    const msg = document.getElementById(err);
+function validar(id,err){
+    const el=document.getElementById(id);
+    const msg=document.getElementById(err);
 
-    if (!el.value.trim()) {
+    if(!el.value.trim()){
         el.classList.add("erro");
-        msg.style.display = "block";
+        msg.style.display="block";
         return false;
     }
-
     el.classList.remove("erro");
-    msg.style.display = "none";
+    msg.style.display="none";
     return true;
 }
 
 /* Avançar */
-function avancarParaRoleta() {
+function avancarParaRoleta(){
     const ok =
-        validar("nome", "errNome") &
-        validar("telefone", "errTel") &
-        validar("cep", "errCep") &
-        validar("rua", "errRua") &
-        validar("numero", "errNum");
+        validar("nome","errNome") &
+        validar("telefone","errTel") &
+        validar("cep","errCep") &
+        validar("rua","errRua") &
+        validar("numero","errNum");
 
-    if (!ok) return;
+    if(!ok) return;
 
-    formData = {
-        nome: nome.value.trim(),
-        telefone: telefone.value.trim(),
-        cep: cep.value.trim(),
-        rua: rua.value.trim(),
-        numero: numero.value.trim(),
-        complemento: complemento.value.trim()
-    };
-
-    formulario.style.display = "none";
-    roletaArea.style.display = "block";
-
-    saudacao.textContent =
-        "Boa sorte, " + formData.nome.split(" ")[0] + "!";
+    formulario.style.display="none";
+    roletaArea.style.display="block";
+    saudacao.textContent="Boa sorte, "+nome.value.split(" ")[0]+"!";
 }
 
 /* Sorteio */
-function drawPrize() {
-    const lista = Object.entries(premios).filter(([k, v]) => v.distribuidos < v.total);
-    let total = lista.reduce((s, [, v]) => s + v.peso, 0);
+function sortear(){
+    let lista=Object.entries(premios).filter(([k,v])=>v.distribuidos < v.total);
+    let totalPeso=lista.reduce((t,[k,v])=>t+v.peso,0);
 
-    let r = Math.random() * total;
+    let r=Math.random()*totalPeso;
 
-    for (const [nome, info] of lista) {
-        r -= info.peso;
-        if (r <= 0) return nome;
+    for(const [nome,info] of lista){
+        r-=info.peso;
+        if(r<=0) return nome;
     }
 }
 
 /* Giro */
-function girarRoleta() {
-    if (spinning) return;
+function girarRoleta(){
+    if(spinning) return;
 
-    const premio = drawPrize();
-    const idx = NAMES.indexOf(premio.toUpperCase());
+    let premio=sortear();
+    let idx=PRIZES.indexOf(premio.toUpperCase());
 
-    spinning = true;
-
+    spinning=true;
     btnGirar.classList.add("girando");
-    btnGirar.textContent = "...";
+    btnGirar.textContent="...";
 
-    const sliceCenter = -90 + (idx * ANGLE) + (ANGLE / 2);
-    const spins = 5;
-
-    const finalRotation = currentRotation + spins * 360 + sliceCenter;
-
-    roletaInner.style.transform = `rotate(${-finalRotation}deg)`;
-
+    let finalRotation = currentRotation + 720 + (360 - (idx*ANGLE) - ANGLE/2);
+    roletaInner.style.transform = `rotate(${finalRotation}deg)`;
     currentRotation = finalRotation % 360;
 
-    setTimeout(() => {
+    setTimeout(()=>{
+
         premios[premio].distribuidos++;
 
-        /* Enviar para Google Sheets */
         fetch(SCRIPT_URL, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                ...formData,
+            method:"POST",
+            mode:"no-cors",
+            headers:{ "Content-Type":"application/json" },
+            body:JSON.stringify({
+                nome:nome.value,
+                telefone:telefone.value,
+                cep:cep.value,
+                rua:rua.value,
+                numero:numero.value,
+                complemento:complemento.value,
                 premio,
-                data: new Date().toLocaleString("pt-BR")
+                data:new Date().toLocaleString("pt-BR")
             })
         });
 
-        premioGanho.textContent = premio;
+        premioGanho.textContent=premio;
 
-        roletaArea.style.display = "none";
+        roletaArea.style.display="none";
         resultado.classList.add("show");
 
         btnGirar.classList.remove("girando");
-        btnGirar.textContent = "GIRAR";
+        btnGirar.textContent="GIRAR";
 
-        spinning = false;
-    }, DURATION_MS + 100);
+        spinning=false;
+
+    },8000);
 }
 
 /* Reiniciar */
-function reiniciar() {
+function reiniciar(){
     resultado.classList.remove("show");
-    formulario.style.display = "block";
+    formulario.style.display="block";
 
-    nome.value = "";
-    telefone.value = "";
-    cep.value = "";
-    rua.value = "";
-    numero.value = "";
-    complemento.value = "";
+    nome.value="";
+    telefone.value="";
+    cep.value="";
+    rua.value="";
+    numero.value="";
+    complemento.value="";
 
-    document.querySelectorAll(".msg-erro").forEach(e => e.style.display = "none");
-    document.querySelectorAll("input").forEach(e => e.classList.remove("erro"));
+    document.querySelectorAll(".msg-erro").forEach(e=>e.style.display="none");
+    document.querySelectorAll("input").forEach(e=>e.classList.remove("erro"));
 }
+
 </script>
 
 </body>
