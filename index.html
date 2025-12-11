@@ -1,355 +1,367 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Roleta da Sorte — Pizza Slices (Opção A)</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roleta da Sorte - Ajustada Pizza</title>
+
 <style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{
-    font-family: "Segoe UI", Tahoma, sans-serif;
-    min-height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
-    padding:20px;
-  }
+    *{margin:0;padding:0;box-sizing:border-box}
 
-  .container{
-    width:540px;max-width:95%;
-    background:#fff;border-radius:18px;padding:26px;
-    box-shadow:0 20px 60px rgba(0,0,0,.25);
-  }
+    body{
+        font-family:'Segoe UI',sans-serif;
+        background:linear-gradient(135deg,#667eea,#764ba2);
+        min-height:100vh;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:20px;
+    }
 
-  h1{font-size:24px;text-align:center;color:#333;margin-bottom:6px}
-  .subtitle{font-size:14px;color:#666;text-align:center;margin-bottom:14px}
+    .container{
+        background:#fff;
+        padding:30px;
+        width:500px;
+        border-radius:20px;
+        box-shadow:0 20px 50px rgba(0,0,0,.3);
+    }
 
-  .form-group{margin-bottom:12px}
-  label{display:block;margin-bottom:6px;color:#333;font-weight:600}
-  input{width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:15px}
-  input.erro{border-color:#dc3545}
-  .msg-erro{color:#dc3545;font-size:13px;display:none;margin-top:6px}
+    h1{text-align:center;margin-bottom:10px;color:#333}
+    .subtitle{text-align:center;color:#666;margin-bottom:20px}
 
-  .btn{
-    width:100%;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,#667eea,#764ba2);
-    color:white;font-weight:700;font-size:16px;cursor:pointer;margin-top:8px;
-  }
+    .form-group{margin-bottom:15px}
+    label{font-weight:600;color:#333}
+    input{
+        width:100%;padding:10px;
+        border:2px solid #ddd;border-radius:10px;
+        font-size:16px;margin-top:5px;
+    }
 
-  /* ROLET A (pizza) */
-  .roleta-wrapper{width:420px;height:420px;margin:16px auto;position:relative}
-  .seta{
-    position:absolute;top:-36px;left:50%;transform:translateX(-50%);
-    width:0;height:0;border-left:28px solid transparent;border-right:28px solid transparent;
-    border-top:56px solid #ffd700;z-index:80;filter:drop-shadow(0 6px 12px rgba(0,0,0,0.25));
-  }
+    input.erro{border-color:#dc3545}
+    .msg-erro{color:#dc3545;font-size:14px;display:none;margin-top:4px}
 
-  .roleta{
-    width:100%;height:100%;border-radius:50%;position:relative;overflow:visible;
-    display:flex;align-items:center;justify-content:center;
-  }
+    .btn{
+        width:100%;padding:15px;
+        background:linear-gradient(135deg,#667eea,#764ba2);
+        border:none;border-radius:12px;
+        color:#fff;font-weight:700;
+        margin-top:10px;
+        cursor:pointer;
+    }
 
-  /* === usamos conic-gradient para criar as fatias (pizza) ===
-     "from -90deg" faz o início do gradiente apontar para o topo (seta) */
-  .roleta-inner{
-    width:92%;height:92%;border-radius:50%;
-    overflow:visible; /* labels ficarão visíveis */
-    transition: transform 8s cubic-bezier(.17,.67,.12,.99);
-    transform-origin:center center;
-    /* fundo definido dinamicamente via JS para suportar N items, mas padrão 4 */
-    background: conic-gradient(from -90deg, #FFFFFF 0deg 90deg, #DC143C 90deg 180deg, #FFFFFF 180deg 270deg, #DC143C 270deg 360deg);
-    box-shadow: 0 8px 30px rgba(0,0,0,.12), inset 0 0 0 8px rgba(0,0,0,.06);
-    position:relative;
-  }
+    .roleta-wrapper{
+        width:380px;height:380px;
+        margin:20px auto;
+        position:relative;
+    }
 
-  /* Labels que ficam dentro das fatias.
-     Cada label é posicionado no centro radial da fatia (com JS). */
-  .slice-label{
-    position:absolute;
-    left:50%;
-    top:50%;
-    transform-origin:center center;
-    font-weight:800;
-    font-size:18px;
-    white-space:nowrap;
-    pointer-events:none;
-    color:#000;
-  }
+    .seta{
+        position:absolute;
+        top:-40px;left:50%;
+        transform:translateX(-50%);
+        width:0;height:0;
+        border-left:30px solid transparent;
+        border-right:30px solid transparent;
+        border-top:60px solid #ffd700;
+        z-index:9999;
+    }
 
-  .centro{
-    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-    width:110px;height:110px;border-radius:50%;
-    background:radial-gradient(circle,#FFD700 0%,#FFA500 60%,#FF8C00 100%);
-    display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;border:3px solid #D4AF37;z-index:85;cursor:pointer;
-    box-shadow:0 0 0 6px rgba(0,0,0,0.12);
-    font-size:18px;
-  }
-  .centro.girando{opacity:.8;pointer-events:none}
+    .roleta{
+        width:100%;height:100%;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        position:relative;
+    }
 
-  .resultado{display:none;text-align:center;margin-top:8px}
-  .resultado.show{display:block}
-  .resultado-premio{font-size:40px;color:#667eea;font-weight:800;margin:8px 0}
+    /* FATIAS EM CÍRCULO (PIZZA) */
+    .roleta-inner{
+        width:100%;height:100%;
+        border-radius:50%;
+        transition:transform 8s cubic-bezier(.17,.67,.12,.99);
+        overflow:visible;
+        position:relative;
+        box-shadow:0 0 0 12px #D4AF37,0 0 0 16px #333;
+    }
+
+    /* Labels que aparecem dentro das fatias */
+    .slice-label{
+        position:absolute;
+        left:50%;top:50%;
+        transform-origin:center center;
+        font-size:20px;
+        font-weight:700;
+        color:#000;
+        pointer-events:none;
+        white-space:nowrap;
+        z-index:9999;
+    }
+
+    .centro{
+        position:absolute;
+        left:50%;top:50%;
+        transform:translate(-50%,-50%);
+        width:110px;height:110px;
+        background:radial-gradient(circle,#FFD700,#FFA500,#FF8C00);
+        border-radius:50%;
+        border:4px solid #D4AF37;
+        font-weight:800;
+        color:#fff;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        cursor:pointer;
+        z-index:9999;
+    }
+
+    .centro.girando{opacity:0.7;pointer-events:none}
+
+    .resultado{text-align:center;display:none}
+    .resultado.show{display:block}
+    .resultado-premio{
+        font-size:42px;font-weight:900;
+        color:#667eea;margin:20px 0;
+    }
 </style>
 </head>
+
 <body>
-  <div class="container">
+<div class="container">
+
     <!-- FORM -->
     <div id="formulario">
-      <h1>Roleta da Sorte</h1>
-      <p class="subtitle">Preencha seus dados e concorra!</p>
+        <h1>Roleta da Sorte</h1>
+        <p class="subtitle">Preencha seus dados para girar!</p>
 
-      <div class="form-group">
-        <label>Nome Completo *</label>
-        <input id="nome" type="text" />
-        <div id="errNome" class="msg-erro">Preencha o nome</div>
-      </div>
-      <div class="form-group">
-        <label>Telefone *</label>
-        <input id="telefone" type="tel" maxlength="15" />
-        <div id="errTel" class="msg-erro">Preencha o telefone</div>
-      </div>
-      <div class="form-group">
-        <label>CEP *</label>
-        <input id="cep" type="text" maxlength="9" />
-        <div id="errCep" class="msg-erro">Preencha o CEP</div>
-      </div>
-      <div class="form-group">
-        <label>Rua *</label>
-        <input id="rua" type="text" />
-        <div id="errRua" class="msg-erro">Preencha a rua</div>
-      </div>
-      <div class="form-group">
-        <label>Número *</label>
-        <input id="numero" type="text" />
-        <div id="errNum" class="msg-erro">Preencha o número</div>
-      </div>
+        <div class="form-group">
+            <label>Nome *</label>
+            <input id="nome" type="text">
+            <div id="errNome" class="msg-erro">Preencha o nome</div>
+        </div>
 
-      <button class="btn" onclick="avancarParaRoleta()">Girar a Roleta!</button>
+        <div class="form-group">
+            <label>Telefone *</label>
+            <input id="telefone" type="tel" maxlength="15">
+            <div id="errTel" class="msg-erro">Preencha o telefone</div>
+        </div>
+
+        <div class="form-group">
+            <label>CEP *</label>
+            <input id="cep" maxlength="9">
+            <div id="errCep" class="msg-erro">Preencha o CEP</div>
+        </div>
+
+        <div class="form-group">
+            <label>Rua *</label>
+            <input id="rua">
+            <div id="errRua" class="msg-erro">Preencha a rua</div>
+        </div>
+
+        <div class="form-group">
+            <label>Número *</label>
+            <input id="numero">
+            <div id="errNum" class="msg-erro">Preencha o número</div>
+        </div>
+
+        <button class="btn" onclick="avancarParaRoleta()">Girar a Roleta!</button>
     </div>
 
     <!-- ROLETA -->
     <div id="roletaArea" style="display:none">
-      <h1 id="saudacao" style="text-align:center;color:#333;margin:6px 0 0 0">Boa sorte!</h1>
 
-      <div class="roleta-wrapper">
-        <div class="seta"></div>
-        <div class="roleta">
-          <div id="roletaInner" class="roleta-inner"></div>
+        <h1 id="saudacao" style="text-align:center;margin-bottom:10px">Boa sorte!</h1>
+
+        <div class="roleta-wrapper">
+
+            <div class="seta"></div>
+
+            <div class="roleta">
+                <div id="roletaInner" class="roleta-inner"></div>
+            </div>
+
+            <div id="btnGirar" class="centro" onclick="girarRoleta()">GIRAR</div>
         </div>
-        <div id="btnGirar" class="centro" onclick="girarRoleta()">GIRAR</div>
-      </div>
     </div>
 
     <!-- RESULTADO -->
     <div id="resultado" class="resultado">
-      <h2 style="text-align:center;color:#333">Parabéns!</h2>
-      <p style="text-align:center;color:#444">Você ganhou:</p>
-      <div id="premioGanho" class="resultado-premio">--</div>
-      <p style="text-align:center;color:#666">Dirija-se ao balcão para retirar.</p>
-      <div style="text-align:center;margin-top:8px">
+        <h2>Parabéns!</h2>
+        <p>Você ganhou:</p>
+
+        <div id="premioGanho" class="resultado-premio"></div>
+
+        <p>Retire seu prêmio no balcão.</p>
+
         <button class="btn" onclick="reiniciar()">Próximo participante</button>
-      </div>
     </div>
-  </div>
+
+</div>
 
 <script>
-/* ===== CONFIG ===== */
-const DURATION_MS = 8000; // 8s - ajuste se quiser
-const NAMES = ['CANETA','COPO','ALMOFADA','FONE']; // ordem das fatias (sentido horário)
-const SLICE_COUNT = NAMES.length;
-const ANGLE = 360 / SLICE_COUNT;
-const RADIUS = 0.38 * 420; // aproximação do raio em px para posicionar labels (ajuste fino)
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzojpuOhfwH1TfSKe0ITynGAVVa4xVQwwneCUvw1A5wqdbf-jhag_CvFHyaBxCWObYgsw/exec';
+/* CONFIG */
+const DURATION_MS = 8000;
+const NAMES = ["CANETA","COPO","ALMOFADA","FONE"];
+const ANGLE = 360 / NAMES.length;
 
-/* ===== Estado ===== */
 let premios = {
-  'Caneta':{total:600,distribuidos:0,peso:30},
-  'Copo':{total:100,distribuidos:0,peso:3},
-  'Almofada':{total:50,distribuidos:0,peso:1.5},
-  'Fone':{total:50,distribuidos:0,peso:1}
+    "Caneta":{total:600,distribuidos:0,peso:30},
+    "Copo":{total:100,distribuidos:0,peso:3},
+    "Almofada":{total:50,distribuidos:0,peso:1.5},
+    "Fone":{total:50,distribuidos:0,peso:1}
 };
-let formData = {};
-let spinning = false;
-let currentRotation = 0; // acumulado em graus
 
-/* ===== Init ===== */
+let spinning = false;
+let currentRotation = 0;
+let formData = {};
+
 window.onload = ()=>{ buildWheel(); applyMasks(); };
 
-/* === Máscaras simples === */
+/* MASKS */
 function applyMasks(){
-  document.getElementById('telefone').addEventListener('input', e=>{
-    let v = e.target.value.replace(/\D/g,'');
-    if(v.length>2) v = v.replace(/^(\d{2})(\d)/,'($1) $2');
-    if(v.length>7) v = v.replace(/(\d)(\d{4})$/,'$1-$2');
-    e.target.value = v;
-  });
-  document.getElementById('cep').addEventListener('input', e=>{
-    let v = e.target.value.replace(/\D/g,'');
-    if(v.length>5) v = v.replace(/^(\d{5})(\d)/,'$1-$2');
-    e.target.value = v;
-  });
+    telefone.addEventListener("input", e=>{
+        let v=e.target.value.replace(/\D/g,'');
+        if(v.length>2) v=v.replace(/^(\d{2})(\d)/,"($1) $2");
+        if(v.length>7) v=v.replace(/(\d)(\d{4})$/,"$1-$2");
+        e.target.value=v;
+    });
+
+    cep.addEventListener("input", e=>{
+        let v=e.target.value.replace(/\D/g,'');
+        if(v.length>5) v=v.replace(/^(\d{5})(\d)/,"$1-$2");
+        e.target.value=v;
+    });
 }
 
-/* ===== Build wheel: conic-gradient + labels ===== */
+/* CRIA A ROLETA */
 function buildWheel(){
-  const inner = document.getElementById('roletaInner');
-  inner.innerHTML='';
+    const inner = document.getElementById("roletaInner");
+    inner.innerHTML = "";
 
-  // set background using conic-gradient from -90deg so 0 starts at top (seta)
-  // alternating white/red slices
-  const stops = [];
-  for(let i=0;i<SLICE_COUNT;i++){
-    const start = i * ANGLE;
-    const end = start + ANGLE;
-    const color = (i % 2 === 0) ? '#FFFFFF' : '#DC143C';
-    stops.push(`${color} ${start}deg ${end}deg`);
-  }
-  inner.style.background = `conic-gradient(from -90deg, ${stops.join(', ')})`;
+    // Criar fatias usando conic-gradient
+    const stops = [];
+    for(let i=0;i<NAMES.length;i++){
+        const start = i * ANGLE;
+        const end = start + ANGLE;
+        const color = (i % 2 === 0) ? "#FFF" : "#DC143C";
+        stops.push(`${color} ${start}deg ${end}deg`);
+    }
 
-  // create labels positioned at middle of each slice
-  const rect = inner.getBoundingClientRect();
-  // we will position labels relative to center; use fixed pixel distance for translate
-  const distance = Math.min(rect.width, rect.height) * 0.32; // ajustável (0.32)
-  for(let i=0;i<SLICE_COUNT;i++){
-    const label = document.createElement('div');
-    label.className = 'slice-label';
-    label.textContent = NAMES[i];
+    inner.style.background = `conic-gradient(from -90deg, ${stops.join(", ")})`;
 
-    // center angle for slice, but because gradient starts from -90deg,
-    // the visual center (degrees from +X) is: -90deg + (i*ANGLE + ANGLE/2)
-    // to place label, we rotate by that angle and then translate radially outward,
-    // then rotate back to keep text horizontal.
-    const sliceCenter = -90 + (i * ANGLE) + (ANGLE/2); // degrees
-    // CSS transform: rotate(sliceCenter) translateY(-distance) rotate(-sliceCenter)
-    // rotate positive goes clockwise in CSS (angles in deg)
-    label.style.transform = `rotate(${sliceCenter}deg) translateY(-${distance}px) rotate(${-sliceCenter}deg)`;
-    // ensure labels are above wheel visuals
-    label.style.zIndex = 70;
-    inner.appendChild(label);
-  }
+    // Criar labels dentro da pizza
+    const distance = 120; // 🔥 ajuste ideal para ficar dentro da pizza
+
+    for(let i=0;i<NAMES.length;i++){
+        const label = document.createElement("div");
+        label.className = "slice-label";
+        label.textContent = NAMES[i];
+
+        const centerAngle = -90 + (i * ANGLE) + (ANGLE/2);
+
+        label.style.transform = `
+            rotate(${centerAngle}deg)
+            translateY(-${distance}px)
+            rotate(${-centerAngle}deg)
+        `;
+
+        inner.appendChild(label);
+    }
 }
 
-/* ===== Validations and advance ===== */
-function validar(id, errId){
-  const el = document.getElementById(id);
-  const msg = document.getElementById(errId);
-  if(!el.value || !el.value.trim()){
-    el.classList.add('erro'); if(msg) msg.style.display='block';
-    return false;
-  }
-  el.classList.remove('erro'); if(msg) msg.style.display='none';
-  return true;
+/* VALIDA CAMPOS */
+function validar(id,err){
+    const el=document.getElementById(id);
+    const msg=document.getElementById(err);
+
+    if(!el.value.trim()){ el.classList.add("erro"); msg.style.display="block"; return false; }
+    el.classList.remove("erro"); msg.style.display="none";
+    return true;
 }
 
+/* AVANÇA PARA ROLETA */
 function avancarParaRoleta(){
-  const ok = validar('nome','errNome') & validar('telefone','errTel') & validar('cep','errCep') & validar('rua','errRua') & validar('numero','errNum');
-  if(!ok) return;
-  formData = {
-    nome: document.getElementById('nome').value.trim(),
-    telefone: document.getElementById('telefone').value.trim(),
-    cep: document.getElementById('cep').value.trim(),
-    rua: document.getElementById('rua').value.trim(),
-    numero: document.getElementById('numero').value.trim()
-  };
-  document.getElementById('formulario').style.display='none';
-  document.getElementById('roletaArea').style.display='block';
-  document.getElementById('saudacao').textContent = 'Boa sorte, ' + formData.nome.split(' ')[0] + '!';
+    const ok =
+        validar("nome","errNome") &
+        validar("telefone","errTel") &
+        validar("cep","errCep") &
+        validar("rua","errRua") &
+        validar("numero","errNum");
+
+    if(!ok) return;
+
+    formData = {
+        nome: nome.value.trim(),
+        telefone: telefone.value.trim(),
+        cep: cep.value.trim(),
+        rua: rua.value.trim(),
+        numero: numero.value.trim()
+    };
+
+    formulario.style.display="none";
+    roletaArea.style.display="block";
+
+    saudacao.textContent = "Boa sorte, " + formData.nome.split(" ")[0] + "!";
 }
 
-/* ===== Weighted draw ===== */
+/* SORTEIA PRÊMIO */
 function drawPrize(){
-  const avail = Object.entries(premios).filter(([k,v]) => v.distribuidos < v.total);
-  if(avail.length === 0) return null;
-  const totalPeso = avail.reduce((s,[k,v]) => s + v.peso, 0);
-  let r = Math.random()*totalPeso;
-  for(const [nome,info] of avail){
-    r -= info.peso;
-    if(r <= 0) return nome;
-  }
-  return avail[0][0];
+    const disponiveis = Object.entries(premios).filter(([k,v])=>v.distribuidos < v.total);
+    let totalPeso = disponiveis.reduce((sum,[k,v])=>sum+v.peso,0);
+
+    let r=Math.random()*totalPeso;
+    for(const [nome,info] of disponiveis){
+        r-=info.peso;
+        if(r<=0) return nome;
+    }
+    return disponiveis[0][0];
 }
 
-/* ===== Spin (calculates angle to align chosen slice with the top arrow) ===== */
+/* GIRO */
 function girarRoleta(){
-  if(spinning) return;
+    if(spinning) return;
 
-  const prize = drawPrize();
-  if(!prize){ alert('Todos os prêmios foram distribuídos'); return; }
+    const premio = drawPrize();
+    const idx = NAMES.indexOf(premio.toUpperCase());
+    if(idx === -1){ alert("Erro interno"); return; }
 
-  // find index in NAMES (case-insensitive)
-  const idx = NAMES.findIndex(n => n.toUpperCase() === prize.toUpperCase());
-  if(idx === -1){ console.error('Índice não encontrado para', prize); return; }
+    spinning = true;
 
-  spinning = true;
-  const btn = document.getElementById('btnGirar');
-  btn.classList.add('girando');
-  btn.textContent = '...';
+    btnGirar.classList.add("girando");
+    btnGirar.textContent = "...";
 
-  // random extra spins to make it dynamic
-  const spins = 4 + Math.floor(Math.random()*3); // 4..6
-  // Because conic-gradient has "from -90deg", the slice center (in degrees) relative to +X is:
-  // sliceCenter = -90 + (idx*ANGLE + ANGLE/2)
-  const sliceCenterDeg = -90 + (idx * ANGLE) + (ANGLE / 2);
+    const sliceCenter = -90 + (idx * ANGLE) + (ANGLE/2);
 
-  // We want that slice center to align to top (0deg vertical). When we rotate the wheel,
-  // using transform: rotate(angle), positive rotates clockwise visually.
-  // We'll accumulate a finalRotation (positive) and then apply rotate(-finalRotation) to spin clockwise.
-  const additional = spins * 360 + sliceCenterDeg; // positive amount to bring center to top
-  const finalRotation = currentRotation + additional;
+    const spins = 5;
+    const finalRotation = currentRotation + spins*360 + sliceCenter;
 
-  const inner = document.getElementById('roletaInner');
-  inner.style.transition = `transform ${DURATION_MS}ms cubic-bezier(.17,.67,.12,.99)`;
+    roletaInner.style.transform = `rotate(${-finalRotation}deg)`;
+    currentRotation = finalRotation % 360;
 
-  // apply with negative sign so visual rotates clockwise
-  requestAnimationFrame(() => {
-    inner.style.transform = `rotate(${-finalRotation}deg)`;
-  });
+    setTimeout(()=>{
+        premios[premio].distribuidos++;
 
-  // update accumulated rotation
-  currentRotation = finalRotation % 360;
+        premioGanho.textContent = premio;
 
-  // debug log (pode remover)
-  console.log('SORTEADO:', prize, 'idx=', idx, 'sliceCenterDeg=', sliceCenterDeg, 'finalRotation=', finalRotation);
+        roletaArea.style.display="none";
+        resultado.classList.add("show");
 
-  // after animation finish:
-  setTimeout(() => {
-    // increment count
-    premios[prize].distribuidos++;
+        btnGirar.classList.remove("girando");
+        btnGirar.textContent="GIRAR";
+        spinning=false;
 
-    // attempt to send (no-cors)
-    try{
-      fetch(SCRIPT_URL, {
-        method:'POST',
-        mode:'no-cors',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({...formData, premio: prize, data: new Date().toLocaleString('pt-BR')})
-      });
-    }catch(e){ console.log('Erro envio:', e); }
-
-    // show result (prize chosen)
-    document.getElementById('roletaArea').style.display='none';
-    document.getElementById('premioGanho').textContent = prize;
-    document.getElementById('resultado').classList.add('show');
-
-    btn.classList.remove('girando');
-    btn.textContent = 'GIRAR';
-    spinning = false;
-  }, DURATION_MS + 60);
+    },DURATION_MS+100);
 }
 
-/* ===== Restart ===== */
+/* RESET */
 function reiniciar(){
-  document.getElementById('formulario').style.display='block';
-  document.getElementById('roletaArea').style.display='none';
-  document.getElementById('resultado').classList.remove('show');
+    resultado.classList.remove("show");
+    formulario.style.display="block";
 
-  ['nome','telefone','cep','rua','numero'].forEach(id => document.getElementById(id).value = '');
-  document.querySelectorAll('.msg-erro').forEach(e => e.style.display='none');
-  document.querySelectorAll('input').forEach(i => i.classList.remove('erro'));
+    nome.value = telefone.value = cep.value = rua.value = numero.value = "";
+    document.querySelectorAll(".msg-erro").forEach(m=>m.style.display="none");
+    document.querySelectorAll("input").forEach(i=>i.classList.remove("erro"));
 }
-
-/* Rebuild labels if window resizes (keep positions good) */
-window.addEventListener('resize', ()=>{ buildWheel(); });
 </script>
+
 </body>
 </html>
