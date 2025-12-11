@@ -54,7 +54,11 @@
             font-weight: 500;
         }
         
-        input, textarea {
+        label .obrigatorio {
+            color: #dc3545;
+        }
+        
+        input {
             width: 100%;
             padding: 12px;
             border: 2px solid #ddd;
@@ -63,14 +67,20 @@
             transition: border-color 0.3s;
         }
         
-        input:focus, textarea:focus {
+        input:focus {
             outline: none;
             border-color: #667eea;
         }
         
-        textarea {
-            resize: vertical;
-            min-height: 80px;
+        input.erro {
+            border-color: #dc3545;
+        }
+        
+        .msg-erro {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
         }
         
         .btn {
@@ -93,6 +103,12 @@
         
         .btn:active {
             transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
         }
         
         .roleta-container {
@@ -167,8 +183,9 @@
             font-weight: bold;
             font-size: 20px;
             text-transform: uppercase;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
             letter-spacing: 1px;
+            color: #000;
         }
         
         .centro {
@@ -254,21 +271,36 @@
         <!-- Etapa 1: Formulario -->
         <div id="formulario">
             <h1>Roleta da Sorte</h1>
-            <p class="subtitle">Preencha seus dados e concorra a premios!</p>
+            <p class="subtitle">Preencha seus dados e concorra a prêmios!</p>
             
             <div class="form-group">
-                <label>Nome Completo *</label>
+                <label>Nome Completo <span class="obrigatorio">*</span></label>
                 <input type="text" id="nome" placeholder="Digite seu nome completo">
+                <div class="msg-erro" id="erroNome">Por favor, preencha seu nome</div>
             </div>
             
             <div class="form-group">
-                <label>Telefone *</label>
-                <input type="tel" id="telefone" placeholder="(00) 00000-0000">
+                <label>Telefone <span class="obrigatorio">*</span></label>
+                <input type="tel" id="telefone" placeholder="(00) 00000-0000" maxlength="15">
+                <div class="msg-erro" id="erroTelefone">Por favor, preencha seu telefone</div>
             </div>
             
             <div class="form-group">
-                <label>Endereco *</label>
-                <textarea id="endereco" placeholder="Digite seu endereco completo"></textarea>
+                <label>CEP <span class="obrigatorio">*</span></label>
+                <input type="text" id="cep" placeholder="00000-000" maxlength="9">
+                <div class="msg-erro" id="erroCep">Por favor, preencha seu CEP</div>
+            </div>
+            
+            <div class="form-group">
+                <label>Rua <span class="obrigatorio">*</span></label>
+                <input type="text" id="rua" placeholder="Digite o nome da rua">
+                <div class="msg-erro" id="erroRua">Por favor, preencha o nome da rua</div>
+            </div>
+            
+            <div class="form-group">
+                <label>Número <span class="obrigatorio">*</span></label>
+                <input type="text" id="numero" placeholder="Digite o número">
+                <div class="msg-erro" id="erroNumero">Por favor, preencha o número</div>
             </div>
             
             <button class="btn" onclick="avancarParaRoleta()">Girar a Roleta!</button>
@@ -290,20 +322,21 @@
         <!-- Etapa 3: Resultado -->
         <div id="resultado" class="hidden resultado-container">
             <div class="resultado-icon">🎉</div>
-            <h2 class="resultado-titulo">Parabens!</h2>
-            <p class="resultado-msg">Voce ganhou:</p>
+            <h2 class="resultado-titulo">Parabéns!</h2>
+            <p class="resultado-msg">Você ganhou:</p>
             <div class="resultado-premio" id="premioGanho"></div>
-            <p class="resultado-msg">Dirija-se ao balcao para retirar seu premio!</p>
-            <button class="btn" onclick="reiniciar()">Proximo Participante</button>
+            <p class="resultado-msg">Dirija-se ao balcão para retirar seu prêmio!</p>
+            <button class="btn" onclick="reiniciar()">Próximo Participante</button>
         </div>
     </div>
 
     <script>
+        // Configuração dos prêmios com peso para sorteio
         let premios = {
-            'Bone': { total: 10, distribuidos: 0, peso: 1 },
-            'Caneta': { total: 600, distribuidos: 0, peso: 10 },
-            'Fone': { total: 50, distribuidos: 0, peso: 1 },
-            'Copo': { total: 20, distribuidos: 0, peso: 2 }
+            'Caneta': { total: 600, distribuidos: 0, peso: 30 },
+            'Copo': { total: 100, distribuidos: 0, peso: 3 },
+            'Almofada': { total: 50, distribuidos: 0, peso: 1.5 },
+            'Fone': { total: 50, distribuidos: 0, peso: 1 }
         };
         
         let formData = {};
@@ -314,7 +347,29 @@
         
         window.onload = function() {
             criarRoleta();
+            aplicarMascaras();
         };
+        
+        function aplicarMascaras() {
+            // Máscara para telefone
+            document.getElementById('telefone').addEventListener('input', function(e) {
+                let valor = e.target.value.replace(/\D/g, '');
+                if (valor.length <= 11) {
+                    valor = valor.replace(/^(\d{2})(\d)/g, '($1) $2');
+                    valor = valor.replace(/(\d)(\d{4})$/, '$1-$2');
+                }
+                e.target.value = valor;
+            });
+            
+            // Máscara para CEP
+            document.getElementById('cep').addEventListener('input', function(e) {
+                let valor = e.target.value.replace(/\D/g, '');
+                if (valor.length <= 8) {
+                    valor = valor.replace(/^(\d{5})(\d)/, '$1-$2');
+                }
+                e.target.value = valor;
+            });
+        }
         
         function criarRoleta() {
             const container = document.getElementById('roletaInner');
@@ -326,10 +381,10 @@
                 const fatia = document.createElement('div');
                 fatia.className = 'fatia';
                 
-                const cor = i % 2 === 0 ? '#DC143C' : '#F5DEB3';
-                const corTexto = i % 2 === 0 ? '#FFF' : '#8B0000';
+                // Cores branco e vermelho alternadas
+                const cor = i % 2 === 0 ? '#FFFFFF' : '#DC143C';
                 
-                fatia.style.background = `linear-gradient(135deg, ${cor} 0%, ${cor === '#DC143C' ? '#8B0000' : '#DEB887'} 100%)`;
+                fatia.style.background = cor;
                 fatia.style.transform = `rotate(${anguloFatia * i}deg) skewY(${90 - anguloFatia}deg)`;
                 
                 const conteudo = document.createElement('div');
@@ -339,7 +394,6 @@
                 const texto = document.createElement('div');
                 texto.className = 'fatia-text';
                 texto.textContent = nome;
-                texto.style.color = corTexto;
                 texto.style.transform = `translateY(-80px)`;
                 
                 conteudo.appendChild(texto);
@@ -348,35 +402,62 @@
             });
         }
         
-        function avancarParaRoleta() {
-            const nome = document.getElementById('nome').value.trim();
-            const telefone = document.getElementById('telefone').value.trim();
-            const endereco = document.getElementById('endereco').value.trim();
+        function validarCampo(id, msgErroId) {
+            const campo = document.getElementById(id);
+            const msgErro = document.getElementById(msgErroId);
             
-            if (!nome || !telefone || !endereco) {
-                alert('Por favor, preencha todos os campos!');
+            if (!campo.value.trim()) {
+                campo.classList.add('erro');
+                msgErro.style.display = 'block';
+                return false;
+            } else {
+                campo.classList.remove('erro');
+                msgErro.style.display = 'none';
+                return true;
+            }
+        }
+        
+        function avancarParaRoleta() {
+            // Validar todos os campos
+            const nomeValido = validarCampo('nome', 'erroNome');
+            const telefoneValido = validarCampo('telefone', 'erroTelefone');
+            const cepValido = validarCampo('cep', 'erroCep');
+            const ruaValida = validarCampo('rua', 'erroRua');
+            const numeroValido = validarCampo('numero', 'erroNumero');
+            
+            if (!nomeValido || !telefoneValido || !cepValido || !ruaValida || !numeroValido) {
                 return;
             }
             
-            formData = { nome, telefone, endereco };
+            // Armazenar dados
+            formData = {
+                nome: document.getElementById('nome').value.trim(),
+                telefone: document.getElementById('telefone').value.trim(),
+                cep: document.getElementById('cep').value.trim(),
+                rua: document.getElementById('rua').value.trim(),
+                numero: document.getElementById('numero').value.trim()
+            };
             
             document.getElementById('formulario').classList.add('hidden');
             document.getElementById('roletaDiv').classList.remove('hidden');
-            document.getElementById('saudacao').textContent = 'Boa sorte, ' + nome.split(' ')[0] + '!';
+            document.getElementById('saudacao').textContent = 'Boa sorte, ' + formData.nome.split(' ')[0] + '!';
         }
         
         function sortearPremio() {
+            // Filtrar prêmios disponíveis
             const disponiveis = Object.entries(premios)
                 .filter(([_, info]) => info.distribuidos < info.total);
             
             if (disponiveis.length === 0) {
-                alert('Todos os premios foram distribuidos!');
+                alert('Todos os prêmios foram distribuídos!');
                 return null;
             }
             
+            // Calcular peso total
             const pesoTotal = disponiveis.reduce((acc, [_, info]) => acc + info.peso, 0);
             let aleatorio = Math.random() * pesoTotal;
             
+            // Selecionar prêmio baseado no peso
             for (const [nome, info] of disponiveis) {
                 aleatorio -= info.peso;
                 if (aleatorio <= 0) {
@@ -425,7 +506,9 @@
             const dados = {
                 nome: formData.nome,
                 telefone: formData.telefone,
-                endereco: formData.endereco,
+                cep: formData.cep,
+                rua: formData.rua,
+                numero: formData.numero,
                 premio: premio,
                 data: new Date().toLocaleString('pt-BR')
             };
@@ -437,16 +520,24 @@
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(dados)
-            }).catch(err => console.log('Erro ao enviar'));
+            }).catch(err => console.log('Erro ao enviar:', err));
             
             console.log('Participante:', dados);
         }
         
         function reiniciar() {
+            // Limpar formulário
             document.getElementById('nome').value = '';
             document.getElementById('telefone').value = '';
-            document.getElementById('endereco').value = '';
+            document.getElementById('cep').value = '';
+            document.getElementById('rua').value = '';
+            document.getElementById('numero').value = '';
             
+            // Remover classes de erro
+            document.querySelectorAll('.erro').forEach(el => el.classList.remove('erro'));
+            document.querySelectorAll('.msg-erro').forEach(el => el.style.display = 'none');
+            
+            // Voltar para formulário
             document.getElementById('resultado').classList.add('hidden');
             document.getElementById('formulario').classList.remove('hidden');
             
@@ -457,4 +548,3 @@
     </script>
 </body>
 </html>
-
