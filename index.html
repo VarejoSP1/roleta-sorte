@@ -4,14 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Roleta da Sorte</title>
-
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             min-height: 100vh;
@@ -21,7 +20,7 @@
             justify-content: center;
             padding: 20px;
         }
-
+        
         .container {
             background: white;
             border-radius: 24px;
@@ -30,35 +29,35 @@
             max-width: 500px;
             width: 100%;
         }
-
+        
         h1 {
             text-align: center;
             color: #333;
             margin-bottom: 10px;
             font-size: 32px;
         }
-
+        
         .subtitle {
             text-align: center;
             color: #666;
             margin-bottom: 30px;
         }
-
+        
         .form-group {
             margin-bottom: 20px;
         }
-
+        
         label {
             display: block;
             margin-bottom: 8px;
             color: #333;
             font-weight: 500;
         }
-
+        
         label .obrigatorio {
             color: #dc3545;
         }
-
+        
         input {
             width: 100%;
             padding: 12px;
@@ -67,23 +66,23 @@
             font-size: 16px;
             transition: border-color 0.3s;
         }
-
+        
         input:focus {
             outline: none;
             border-color: #667eea;
         }
-
+        
         input.erro {
             border-color: #dc3545;
         }
-
+        
         .msg-erro {
             color: #dc3545;
             font-size: 14px;
             margin-top: 5px;
             display: none;
         }
-
+        
         .btn {
             width: 100%;
             padding: 16px;
@@ -96,33 +95,33 @@
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
         }
-
+        
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
         }
-
+        
         .btn:active {
             transform: translateY(0);
         }
-
+        
         .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
         }
-
+        
         .roleta-container {
             text-align: center;
         }
-
+        
         .roleta-wrapper {
             position: relative;
             width: 380px;
             height: 380px;
             margin: 30px auto;
         }
-
+        
         .seta {
             position: absolute;
             top: -30px;
@@ -136,23 +135,21 @@
             z-index: 10;
             filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
         }
-
+        
+        /* Ajuste: Transição movida para roleta-inner */
         .roleta {
             width: 100%;
             height: 100%;
             border-radius: 50%;
             position: relative;
-
-            /* 🔥 GIRO MAIS LENTO (10s) */
-            transition: transform 10s cubic-bezier(0.17, 0.67, 0.12, 0.99);
-
             background: white;
-            box-shadow:
+            box-shadow: 
                 0 0 0 15px #D4AF37,
                 0 0 0 18px #333,
                 0 15px 50px rgba(0,0,0,0.5);
         }
-
+        
+        /* Ajuste: Tempo alterado para 10s com curva de desaceleração */
         .roleta-inner {
             width: 100%;
             height: 100%;
@@ -161,8 +158,9 @@
             top: 0;
             left: 0;
             overflow: hidden;
+            transition: transform 10s cubic-bezier(0.25, 1, 0.5, 1);
         }
-
+        
         .fatia {
             position: absolute;
             width: 50%;
@@ -170,24 +168,36 @@
             transform-origin: 100% 100%;
             clip-path: polygon(0% 0%, 100% 0%, 100% 100%);
         }
-
+        
+        .fatia-conteudo {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform-origin: 50% 100%;
+        }
+        
+        /* Ajuste: Tamanho e posição do texto corrigidos */
         .fatia-text {
             font-weight: bold;
-            font-size: 22px;
+            font-size: 18px; /* Fonte levemente menor */
             text-transform: uppercase;
-            color: #000;
-            white-space: nowrap;
-
+            letter-spacing: 1px;
+            color: #000000;
+            text-shadow: none;
+            
             position: absolute;
-            width: 180px;
-            left: -20px;
-            top: 70px;
+            width: 250px; /* Largura maior para não quebrar linha */
             text-align: center;
-
-            transform-origin: center center;
+            left: 15px;
+            top: 55px; /* Ajuste para centralizar na fatia */
+            
             transform: skewY(45deg) rotate(45deg);
+            transform-origin: center center;
         }
-
+        
         .centro {
             position: absolute;
             top: 50%;
@@ -203,313 +213,350 @@
             font-weight: bold;
             color: #fff;
             cursor: pointer;
-            box-shadow:
+            box-shadow: 
                 0 0 0 5px #333,
                 0 8px 20px rgba(0,0,0,0.5);
             border: 3px solid #D4AF37;
             z-index: 5;
             transition: all 0.2s;
             font-size: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
-
+        
         .centro:hover {
             transform: translate(-50%, -50%) scale(1.05);
+            box-shadow: 
+                0 0 0 5px #333,
+                0 10px 25px rgba(0,0,0,0.6);
         }
-
+        
         .centro:active {
             transform: translate(-50%, -50%) scale(0.98);
         }
-
+        
         .centro.girando {
             pointer-events: none;
             opacity: 0.8;
         }
-
+        
         .resultado-container {
             text-align: center;
         }
-
+        
         .resultado-icon {
             font-size: 80px;
             margin-bottom: 20px;
         }
-
+        
         .resultado-titulo {
             font-size: 32px;
             color: #333;
             margin-bottom: 10px;
         }
-
+        
         .resultado-premio {
             font-size: 48px;
             color: #667eea;
             font-weight: bold;
             margin: 20px 0;
         }
-
+        
         .resultado-msg {
             color: #666;
             margin-bottom: 30px;
             font-size: 18px;
         }
-
+        
         .hidden {
             display: none;
         }
     </style>
 </head>
-
 <body>
-
     <div class="container">
-
-        <!-- FORMULÁRIO -->
         <div id="formulario">
             <h1>Roleta da Sorte</h1>
             <p class="subtitle">Preencha seus dados e concorra a prêmios!</p>
-
+            
             <div class="form-group">
                 <label>Nome Completo <span class="obrigatorio">*</span></label>
-                <input type="text" id="nome">
+                <input type="text" id="nome" placeholder="Digite seu nome completo">
                 <div class="msg-erro" id="erroNome">Por favor, preencha seu nome</div>
             </div>
-
+            
             <div class="form-group">
                 <label>Telefone <span class="obrigatorio">*</span></label>
-                <input type="tel" id="telefone" maxlength="15">
+                <input type="tel" id="telefone" placeholder="(00) 00000-0000" maxlength="15">
                 <div class="msg-erro" id="erroTelefone">Por favor, preencha seu telefone</div>
             </div>
-
+            
             <div class="form-group">
                 <label>CEP <span class="obrigatorio">*</span></label>
-                <input type="text" id="cep" maxlength="9">
+                <input type="text" id="cep" placeholder="00000-000" maxlength="9">
                 <div class="msg-erro" id="erroCep">Por favor, preencha seu CEP</div>
             </div>
-
+            
             <div class="form-group">
                 <label>Rua <span class="obrigatorio">*</span></label>
-                <input type="text" id="rua">
+                <input type="text" id="rua" placeholder="Digite o nome da rua">
                 <div class="msg-erro" id="erroRua">Por favor, preencha o nome da rua</div>
             </div>
-
+            
             <div class="form-group">
                 <label>Número <span class="obrigatorio">*</span></label>
-                <input type="text" id="numero">
+                <input type="text" id="numero" placeholder="Digite o número">
                 <div class="msg-erro" id="erroNumero">Por favor, preencha o número</div>
             </div>
-
+            
             <button class="btn" onclick="avancarParaRoleta()">Girar a Roleta!</button>
         </div>
-
-        <!-- ROLETA -->
+        
         <div id="roletaDiv" class="hidden roleta-container">
             <h1 id="saudacao">Boa sorte!</h1>
-
+            
             <div class="roleta-wrapper">
                 <div class="seta"></div>
-
                 <div class="roleta">
                     <div class="roleta-inner" id="roletaInner"></div>
                 </div>
-
                 <div class="centro" id="btnGirar" onclick="girarRoleta()">GIRAR</div>
             </div>
         </div>
-
-        <!-- RESULTADO -->
+        
         <div id="resultado" class="hidden resultado-container">
             <div class="resultado-icon">🎉</div>
             <h2 class="resultado-titulo">Parabéns!</h2>
             <p class="resultado-msg">Você ganhou:</p>
-
             <div class="resultado-premio" id="premioGanho"></div>
-
             <p class="resultado-msg">Dirija-se ao balcão para retirar seu prêmio!</p>
-
             <button class="btn" onclick="reiniciar()">Próximo Participante</button>
         </div>
-
     </div>
 
-<script>
-    let premios = {
-        'Caneta': { total: 600, distribuidos: 0, peso: 30 },
-        'Copo': { total: 100, distribuidos: 0, peso: 3 },
-        'Almofada': { total: 50, distribuidos: 0, peso: 1.5 },
-        'Fone': { total: 50, distribuidos: 0, peso: 1 }
-    };
-
-    let formData = {};
-    let girando = false;
-    let rotacaoAtual = 0;
-
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzojpuOhfwH1TfSKe0ITynGAVVa4xVQwwneCUvw1A5wqdbf-jhag_CvFHyaBxCWObYgsw/exec";
-
-    window.onload = function() {
-        criarRoleta();
-        aplicarMascaras();
-    };
-
-    function aplicarMascaras() {
-        document.getElementById('telefone').addEventListener('input', function(e) {
-            let v = e.target.value.replace(/\D/g, '');
-            if (v.length <= 11) {
-                v = v.replace(/^(\d{2})(\d)/g, '($1) $2');
-                v = v.replace(/(\d)(\d{4})$/, '$1-$2');
-            }
-            e.target.value = v;
-        });
-
-        document.getElementById('cep').addEventListener('input', function(e) {
-            let v = e.target.value.replace(/\D/g, '');
-            if (v.length <= 8) {
-                v = v.replace(/^(\d{5})(\d)/, '$1-$2');
-            }
-            e.target.value = v;
-        });
-    }
-
-    function criarRoleta() {
-        const container = document.getElementById('roletaInner');
-        const nomes = ['CANETA', 'COPO', 'ALMOFADA', 'FONE'];
-        const angulo = 90;
-
-        nomes.forEach((nome, i) => {
-            const fatia = document.createElement('div');
-            fatia.className = 'fatia';
-
-            const cor = i % 2 === 0 ? '#FFFFFF' : '#DC143C';
-            fatia.style.background = cor;
-            fatia.style.transform = `rotate(${angulo * i}deg) skewY(-45deg)`;
-
-            const texto = document.createElement('div');
-            texto.className = 'fatia-text';
-            texto.textContent = nome;
-
-            fatia.appendChild(texto);
-            container.appendChild(fatia);
-        });
-    }
-
-    function validarCampo(id, erroId) {
-        const campo = document.getElementById(id);
-        const erro = document.getElementById(erroId);
-
-        if (!campo.value.trim()) {
-            campo.classList.add("erro");
-            erro.style.display = "block";
-            return false;
-        }
-
-        campo.classList.remove("erro");
-        erro.style.display = "none";
-        return true;
-    }
-
-    function avancarParaRoleta() {
-        const ok =
-            validarCampo("nome", "erroNome") &
-            validarCampo("telefone", "erroTelefone") &
-            validarCampo("cep", "erroCep") &
-            validarCampo("rua", "erroRua") &
-            validarCampo("numero", "erroNumero");
-
-        if (!ok) return;
-
-        formData = {
-            nome: nome.value.trim(),
-            telefone: telefone.value.trim(),
-            cep: cep.value.trim(),
-            rua: rua.value.trim(),
-            numero: numero.value.trim()
+    <script>
+        // Configuração dos prêmios com peso para sorteio
+        let premios = {
+            'Caneta': { total: 600, distribuidos: 0, peso: 30 },
+            'Copo': { total: 100, distribuidos: 0, peso: 3 },
+            'Almofada': { total: 50, distribuidos: 0, peso: 1.5 },
+            'Fone': { total: 50, distribuidos: 0, peso: 1 }
         };
-
-        formulario.classList.add('hidden');
-        roletaDiv.classList.remove('hidden');
-
-        saudacao.textContent = "Boa sorte, " + formData.nome.split(" ")[0] + "!";
-    }
-
-    function sortearPremio() {
-        const disponiveis = Object.entries(premios)
-            .filter(([_, info]) => info.distribuidos < info.total);
-
-        const pesoTotal = disponiveis.reduce((acc, [_, info]) => acc + info.peso, 0);
-        let sorteio = Math.random() * pesoTotal;
-
-        for (const [nome, info] of disponiveis) {
-            sorteio -= info.peso;
-            if (sorteio <= 0)
-                return nome;
+        
+        let formData = {};
+        let girando = false;
+        let rotacaoAtual = 0;
+        
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzojpuOhfwH1TfSKe0ITynGAVVa4xVQwwneCUvw1A5wqdbf-jhag_CvFHyaBxCWObYgsw/exec';
+        
+        window.onload = function() {
+            criarRoleta();
+            aplicarMascaras();
+        };
+        
+        function aplicarMascaras() {
+            // Máscara para telefone
+            document.getElementById('telefone').addEventListener('input', function(e) {
+                let valor = e.target.value.replace(/\D/g, '');
+                if (valor.length <= 11) {
+                    valor = valor.replace(/^(\d{2})(\d)/g, '($1) $2');
+                    valor = valor.replace(/(\d)(\d{4})$/, '$1-$2');
+                }
+                e.target.value = valor;
+            });
+            
+            // Máscara para CEP
+            document.getElementById('cep').addEventListener('input', function(e) {
+                let valor = e.target.value.replace(/\D/g, '');
+                if (valor.length <= 8) {
+                    valor = valor.replace(/^(\d{5})(\d)/, '$1-$2');
+                }
+                e.target.value = valor;
+            });
         }
-
-        return disponiveis[0][0];
-    }
-
-    function girarRoleta() {
-        if (girando) return;
-
-        const premio = sortearPremio();
-        girando = true;
-
-        btnGirar.classList.add("girando");
-        btnGirar.textContent = "...";
-
-        const nomes = ['CANETA', 'COPO', 'ALMOFADA', 'FONE'];
-        const indice = nomes.indexOf(premio.toUpperCase());
-
-        const angulo = 90 * indice;
-        const voltas = 5 + Math.floor(Math.random() * 3);
-
-        const alvo = rotacaoAtual + (360 * voltas) + (360 - angulo) + 45;
-
-        roletaInner.style.transform = `rotate(${alvo}deg)`;
-        rotacaoAtual = alvo % 360;
-
-        setTimeout(() => {
-            premios[premio].distribuidos++;
-
-            enviarParaGoogleSheets(premio);
-
-            roletaDiv.classList.add("hidden");
-            resultado.classList.remove("hidden");
-
-            premioGanho.textContent = premio;
-
-            girando = false;
-        }, 10000); /* 🔥 TEMPO IGUAL AO GIRO (10s) */
-    }
-
-    function enviarParaGoogleSheets(premio) {
-        fetch(GOOGLE_SCRIPT_URL, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                ...formData,
-                premio,
-                data: new Date().toLocaleString("pt-BR")
-            })
-        });
-    }
-
-    function reiniciar() {
-        nome.value = "";
-        telefone.value = "";
-        cep.value = "";
-        rua.value = "";
-        numero.value = "";
-
-        document.querySelectorAll(".erro").forEach(el => el.classList.remove("erro"));
-        document.querySelectorAll(".msg-erro").forEach(el => el.style.display = "none");
-
-        resultado.classList.add("hidden");
-        formulario.classList.remove("hidden");
-
-        btnGirar.classList.remove("girando");
-        btnGirar.textContent = "GIRAR";
-    }
-</script>
-
+        
+        function criarRoleta() {
+            const container = document.getElementById('roletaInner');
+            // Ordem fixa dos prêmios para ter exatamente 4 fatias
+            const nomes = ['CANETA', 'COPO', 'ALMOFADA', 'FONE'];
+            const numFatias = 4;
+            const anguloFatia = 90; // 360 / 4 = 90 graus cada fatia
+            
+            nomes.forEach((nome, i) => {
+                const fatia = document.createElement('div');
+                fatia.className = 'fatia';
+                
+                // Cores branco e vermelho alternadas
+                const cor = i % 2 === 0 ? '#FFFFFF' : '#DC143C';
+                
+                fatia.style.background = cor;
+                fatia.style.width = '50%';
+                fatia.style.height = '50%';
+                fatia.style.position = 'absolute';
+                fatia.style.left = '50%';
+                fatia.style.top = '50%';
+                fatia.style.transformOrigin = '0 0';
+                fatia.style.transform = `rotate(${anguloFatia * i}deg) skewY(-45deg)`;
+                
+                const texto = document.createElement('div');
+                texto.className = 'fatia-text';
+                texto.textContent = nome;
+                
+                // Estilos já definidos no CSS, mas mantendo a estrutura
+                
+                fatia.appendChild(texto);
+                container.appendChild(fatia);
+            });
+        }
+        
+        function validarCampo(id, msgErroId) {
+            const campo = document.getElementById(id);
+            const msgErro = document.getElementById(msgErroId);
+            
+            if (!campo.value.trim()) {
+                campo.classList.add('erro');
+                msgErro.style.display = 'block';
+                return false;
+            } else {
+                campo.classList.remove('erro');
+                msgErro.style.display = 'none';
+                return true;
+            }
+        }
+        
+        function avancarParaRoleta() {
+            // Validar todos os campos
+            const nomeValido = validarCampo('nome', 'erroNome');
+            const telefoneValido = validarCampo('telefone', 'erroTelefone');
+            const cepValido = validarCampo('cep', 'erroCep');
+            const ruaValida = validarCampo('rua', 'erroRua');
+            const numeroValido = validarCampo('numero', 'erroNumero');
+            
+            if (!nomeValido || !telefoneValido || !cepValido || !ruaValida || !numeroValido) {
+                return;
+            }
+            
+            // Armazenar dados
+            formData = {
+                nome: document.getElementById('nome').value.trim(),
+                telefone: document.getElementById('telefone').value.trim(),
+                cep: document.getElementById('cep').value.trim(),
+                rua: document.getElementById('rua').value.trim(),
+                numero: document.getElementById('numero').value.trim()
+            };
+            
+            document.getElementById('formulario').classList.add('hidden');
+            document.getElementById('roletaDiv').classList.remove('hidden');
+            document.getElementById('saudacao').textContent = 'Boa sorte, ' + formData.nome.split(' ')[0] + '!';
+        }
+        
+        function sortearPremio() {
+            // Filtrar prêmios disponíveis
+            const disponiveis = Object.entries(premios)
+                .filter(([_, info]) => info.distribuidos < info.total);
+            
+            if (disponiveis.length === 0) {
+                alert('Todos os prêmios foram distribuídos!');
+                return null;
+            }
+            
+            // Calcular peso total
+            const pesoTotal = disponiveis.reduce((acc, [_, info]) => acc + info.peso, 0);
+            let aleatorio = Math.random() * pesoTotal;
+            
+            // Selecionar prêmio baseado no peso
+            for (const [nome, info] of disponiveis) {
+                aleatorio -= info.peso;
+                if (aleatorio <= 0) {
+                    return nome;
+                }
+            }
+            
+            return disponiveis[0][0];
+        }
+        
+        // Ajuste: Função atualizada para 10 segundos e mais voltas
+        function girarRoleta() {
+            if (girando) return;
+            
+            const premio = sortearPremio();
+            if (!premio) return;
+            
+            girando = true;
+            const btnGirar = document.getElementById('btnGirar');
+            btnGirar.classList.add('girando');
+            btnGirar.textContent = '...';
+            
+            const nomes = ['CANETA', 'COPO', 'ALMOFADA', 'FONE'];
+            const premioUpper = premio.toUpperCase();
+            const indice = nomes.indexOf(premioUpper);
+            const anguloBase = 90; // 360 / 4
+            const anguloAlvo = anguloBase * indice;
+            
+            // Aumentei as voltas (15 a 20) para manter o movimento durante os 10 segundos
+            const voltas = 15 + Math.floor(Math.random() * 5);
+            
+            const rotacaoFinal = rotacaoAtual + (360 * voltas) + (360 - anguloAlvo) + (anguloBase / 2);
+            
+            const roletaInner = document.getElementById('roletaInner');
+            roletaInner.style.transform = `rotate(${rotacaoFinal}deg)`;
+            rotacaoAtual = rotacaoFinal % 360;
+            
+            // Tempo ajustado para 10000ms (10 segundos)
+            setTimeout(() => {
+                premios[premio].distribuidos++;
+                enviarParaGoogleSheets(premio);
+                
+                document.getElementById('roletaDiv').classList.add('hidden');
+                document.getElementById('resultado').classList.remove('hidden');
+                document.getElementById('premioGanho').textContent = premio;
+                
+                girando = false;
+            }, 10000); 
+        }
+        
+        function enviarParaGoogleSheets(premio) {
+            const dados = {
+                nome: formData.nome,
+                telefone: formData.telefone,
+                cep: formData.cep,
+                rua: formData.rua,
+                numero: formData.numero,
+                premio: premio,
+                data: new Date().toLocaleString('pt-BR')
+            };
+            
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(dados)
+            }).catch(err => console.log('Erro ao enviar:', err));
+            
+            console.log('Participante:', dados);
+        }
+        
+        function reiniciar() {
+            // Limpar formulário
+            document.getElementById('nome').value = '';
+            document.getElementById('telefone').value = '';
+            document.getElementById('cep').value = '';
+            document.getElementById('rua').value = '';
+            document.getElementById('numero').value = '';
+            
+            // Remover classes de erro
+            document.querySelectorAll('.erro').forEach(el => el.classList.remove('erro'));
+            document.querySelectorAll('.msg-erro').forEach(el => el.style.display = 'none');
+            
+            // Voltar para formulário
+            document.getElementById('resultado').classList.add('hidden');
+            document.getElementById('formulario').classList.remove('hidden');
+            
+            const btnGirar = document.getElementById('btnGirar');
+            btnGirar.classList.remove('girando');
+            btnGirar.textContent = 'GIRAR';
+        }
+    </script>
 </body>
 </html>
