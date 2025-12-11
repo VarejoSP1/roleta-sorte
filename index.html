@@ -144,19 +144,15 @@ input.erro{
     left:50%;
     top:50%;
     transform-origin:0 0;
-    clip-path:polygon(0 0,100% 0,0 100%);
+    /* Removido clip-path para usar método de conic-gradient */
 }
 
 .fatia-text{
     position:absolute;
-    left:20px;
-    top:20px;
     font-weight:bold;
     font-size:18px;
-    color:#000;
     white-space:nowrap;
-    transform-origin:left top;
-    text-shadow:1px 1px 2px rgba(255,255,255,0.8);
+    z-index:2;
 }
 
 /* BOTÃO CENTRAL */
@@ -291,6 +287,8 @@ input.erro{
         <div class="seta"></div>
 
         <div class="roleta">
+            <!-- Vamos usar canvas para um gráfico de pizza mais preciso -->
+            <canvas id="roletaCanvas" width="380" height="380"></canvas>
             <div id="roletaInner" class="roleta-inner"></div>
         </div>
 
@@ -352,59 +350,127 @@ cep.addEventListener("input", e=>{
     e.target.value=v;
 });
 
-function construirGraficoPizza(){
+function desenharGraficoPizza() {
+    const canvas = document.getElementById("roletaCanvas");
+    const ctx = canvas.getContext("2d");
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = canvas.width / 2 - 10;
+    
+    // Limpar canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Desenhar fundo dourado
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+    ctx.fillStyle = '#D4AF37';
+    ctx.fill();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#333';
+    ctx.stroke();
+    
+    // Desenhar fatias do gráfico de pizza
+    const proporcoes = [85, 5, 5, 5]; // Caneta 85%, outros 5% cada
+    let startAngle = 0;
+    
+    for(let i = 0; i < 4; i++) {
+        const sliceAngle = (proporcoes[i] / 100) * (Math.PI * 2);
+        const endAngle = startAngle + sliceAngle;
+        
+        // Desenhar fatia
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius - 12, startAngle, endAngle);
+        ctx.closePath();
+        
+        // Preencher com cor alternada
+        ctx.fillStyle = COLORS[i];
+        ctx.fill();
+        
+        // Borda da fatia
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#333';
+        ctx.stroke();
+        
+        // Desenhar texto
+        const midAngle = startAngle + sliceAngle / 2;
+        const textRadius = radius * 0.6;
+        const textX = centerX + Math.cos(midAngle) * textRadius;
+        const textY = centerY + Math.sin(midAngle) * textRadius;
+        
+        ctx.save();
+        ctx.translate(textX, textY);
+        
+        // Rotacionar texto para ficar legível
+        if (midAngle > Math.PI/2 && midAngle < 3*Math.PI/2) {
+            ctx.rotate(midAngle + Math.PI);
+        } else {
+            ctx.rotate(midAngle);
+        }
+        
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = 'bold 16px Arial';
+        ctx.fillStyle = TEXT_COLORS[i];
+        
+        // Nome do prêmio
+        ctx.fillText(PRIZES[i], 0, 0);
+        
+        // Porcentagem
+        ctx.font = '14px Arial';
+        ctx.fillText(`${proporcoes[i]}%`, 0, 20);
+        
+        ctx.restore();
+        
+        startAngle = endAngle;
+    }
+    
+    // Desenhar círculo central
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, 55, 0, Math.PI * 2);
+    ctx.fillStyle = '#FFD700';
+    ctx.fill();
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = '#D4AF37';
+    ctx.stroke();
+}
+
+function construirGraficoPizza() {
     const inner = document.getElementById("roletaInner");
     inner.innerHTML = "";
     
-    // Proporções: Caneta 85%, outros 5% cada
-    const proporcoes = [85, 5, 5, 5]; // Total = 100%
-    let anguloAtual = 0;
+    // Desenhar no canvas
+    desenharGraficoPizza();
     
-    PRIZES.forEach((premio, index) => {
-        const porcentagem = proporcoes[index];
-        const anguloFatia = (porcentagem / 100) * 360;
+    // Manter o elemento rotacionável para a animação
+    inner.style.transform = `rotate(0deg)`;
+    
+    // Adicionar elementos de texto flutuante para compatibilidade
+    const proporcoes = [85, 5, 5, 5];
+    let anguloAcumulado = 0;
+    
+    for(let i = 0; i < 4; i++) {
+        const anguloFatia = (proporcoes[i] / 100) * 360;
+        const anguloCentro = anguloAcumulado + (anguloFatia / 2);
         
-        // Criar elemento da fatia
-        let fatia = document.createElement("div");
-        fatia.className = "fatia";
-        fatia.style.background = COLORS[index];
-        fatia.style.border = COLORS[index] === "#FFFFFF" ? "1px solid #ccc" : "none"; // Borda nas brancas
-        
-        // Posicionar e rotacionar a fatia
-        fatia.style.transform = `rotate(${anguloAtual}deg)`;
-        fatia.style.transformOrigin = "0 0";
-        
-        // Criar texto da fatia
         let texto = document.createElement("div");
         texto.className = "fatia-text";
-        texto.textContent = `${premio} (${porcentagem}%)`;
-        texto.style.color = TEXT_COLORS[index];
-        texto.style.fontWeight = "bold";
-        texto.style.fontSize = "16px";
+        texto.textContent = PRIZES[i];
+        texto.style.color = TEXT_COLORS[i];
         
-        // Posicionar o texto no centro da fatia
-        const anguloTexto = anguloAtual + (anguloFatia / 2);
-        texto.style.transform = `rotate(${anguloTexto}deg) translate(120px) rotate(-${anguloTexto}deg)`;
+        // Posicionar texto
+        const raio = 120;
+        const rad = (anguloCentro * Math.PI) / 180;
+        const x = 190 + Math.cos(rad) * raio - 40;
+        const y = 190 + Math.sin(rad) * raio - 15;
         
-        fatia.appendChild(texto);
-        inner.appendChild(fatia);
+        texto.style.left = x + "px";
+        texto.style.top = y + "px";
+        texto.style.transform = `rotate(${anguloCentro}deg)`;
         
-        anguloAtual += anguloFatia;
-    });
-    
-    // Adicionar linha divisória entre as fatias
-    for(let i = 0; i < 4; i++) {
-        const angulo = (85/100*360*i + (i>0?5/100*360*(i-1):0));
-        const linha = document.createElement("div");
-        linha.style.position = "absolute";
-        linha.style.width = "50%";
-        linha.style.height = "2px";
-        linha.style.background = "#333";
-        linha.style.left = "50%";
-        linha.style.top = "50%";
-        linha.style.transformOrigin = "0 0";
-        linha.style.transform = `rotate(${angulo}deg)`;
-        inner.appendChild(linha);
+        inner.appendChild(texto);
+        
+        anguloAcumulado += anguloFatia;
     }
 }
 
