@@ -142,23 +142,21 @@
             border-radius: 50%;
             position: relative;
             transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
-            background: radial-gradient(circle at center, #8B4513 0%, #654321 50%, #8B4513 100%);
+            background: white;
             box-shadow: 
                 0 0 0 15px #D4AF37,
-                0 0 0 18px #8B4513,
-                0 15px 50px rgba(0,0,0,0.5),
-                inset 0 5px 15px rgba(0,0,0,0.3);
+                0 0 0 18px #333,
+                0 15px 50px rgba(0,0,0,0.5);
         }
         
         .roleta-inner {
-            width: 90%;
-            height: 90%;
+            width: 100%;
+            height: 100%;
             border-radius: 50%;
             position: absolute;
-            top: 5%;
-            left: 5%;
+            top: 0;
+            left: 0;
             overflow: hidden;
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.4);
         }
         
         .fatia {
@@ -181,11 +179,11 @@
         
         .fatia-text {
             font-weight: bold;
-            font-size: 20px;
+            font-size: 22px;
             text-transform: uppercase;
-            text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
             letter-spacing: 1px;
-            color: #000;
+            color: #000000;
+            text-shadow: none;
         }
         
         .centro {
@@ -204,10 +202,8 @@
             color: #fff;
             cursor: pointer;
             box-shadow: 
-                0 0 0 8px #8B4513,
-                0 8px 20px rgba(0,0,0,0.5),
-                inset 0 -3px 8px rgba(0,0,0,0.3),
-                inset 0 3px 8px rgba(255,255,255,0.3);
+                0 0 0 5px #333,
+                0 8px 20px rgba(0,0,0,0.5);
             border: 3px solid #D4AF37;
             z-index: 5;
             transition: all 0.2s;
@@ -218,10 +214,8 @@
         .centro:hover {
             transform: translate(-50%, -50%) scale(1.05);
             box-shadow: 
-                0 0 0 8px #8B4513,
-                0 10px 25px rgba(0,0,0,0.6),
-                inset 0 -3px 8px rgba(0,0,0,0.3),
-                inset 0 3px 8px rgba(255,255,255,0.4);
+                0 0 0 5px #333,
+                0 10px 25px rgba(0,0,0,0.6);
         }
         
         .centro:active {
@@ -374,7 +368,7 @@
         function criarRoleta() {
             const container = document.getElementById('roletaInner');
             // Ordem fixa dos prêmios para ter exatamente 4 fatias
-            const nomes = ['Caneta', 'Copo', 'Almofada', 'Fone'];
+            const nomes = ['CANETA', 'COPO', 'ALMOFADA', 'FONE'];
             const numFatias = 4;
             const anguloFatia = 90; // 360 / 4 = 90 graus cada fatia
             
@@ -386,20 +380,25 @@
                 const cor = i % 2 === 0 ? '#FFFFFF' : '#DC143C';
                 
                 fatia.style.background = cor;
-                fatia.style.transform = `rotate(${anguloFatia * i}deg) skewY(0deg)`;
-                fatia.style.clipPath = 'polygon(50% 50%, 100% 0%, 100% 100%)';
-                
-                const conteudo = document.createElement('div');
-                conteudo.className = 'fatia-conteudo';
-                conteudo.style.transform = `rotate(45deg)`;
+                fatia.style.width = '50%';
+                fatia.style.height = '50%';
+                fatia.style.position = 'absolute';
+                fatia.style.left = '50%';
+                fatia.style.top = '50%';
+                fatia.style.transformOrigin = '0 0';
+                fatia.style.transform = `rotate(${anguloFatia * i}deg) skewY(-45deg)`;
                 
                 const texto = document.createElement('div');
                 texto.className = 'fatia-text';
                 texto.textContent = nome;
-                texto.style.transform = `translateY(-100px)`;
+                texto.style.position = 'absolute';
+                texto.style.left = '50%';
+                texto.style.top = '30%';
+                texto.style.transform = `skewY(45deg) rotate(${45}deg) translateX(-50%)`;
+                texto.style.transformOrigin = 'center';
+                texto.style.whiteSpace = 'nowrap';
                 
-                conteudo.appendChild(texto);
-                fatia.appendChild(conteudo);
+                fatia.appendChild(texto);
                 container.appendChild(fatia);
             });
         }
@@ -481,8 +480,9 @@
             btnGirar.classList.add('girando');
             btnGirar.textContent = '...';
             
-            const nomes = ['Caneta', 'Copo', 'Almofada', 'Fone'];
-            const indice = nomes.indexOf(premio);
+            const nomes = ['CANETA', 'COPO', 'ALMOFADA', 'FONE'];
+            const premioUpper = premio.toUpperCase();
+            const indice = nomes.indexOf(premioUpper);
             const anguloBase = 90; // 360 / 4
             const anguloAlvo = anguloBase * indice;
             const voltas = 5 + Math.floor(Math.random() * 3);
