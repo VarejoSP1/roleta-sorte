@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Roleta da Sorte - Corrigida (Opção A)</title>
+<title>Roleta da Sorte — Pizza Slices (Opção A)</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body{
@@ -15,16 +15,15 @@
     background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
     padding:20px;
   }
+
   .container{
-    width:520px;
-    max-width:95%;
-    background:#fff;
-    border-radius:18px;
-    padding:28px;
-    box-shadow:0 20px 60px rgba(0,0,0,0.25);
+    width:540px;max-width:95%;
+    background:#fff;border-radius:18px;padding:26px;
+    box-shadow:0 20px 60px rgba(0,0,0,.25);
   }
-  h1{font-size:26px;text-align:center;color:#333;margin-bottom:8px}
-  .subtitle{font-size:14px;color:#666;text-align:center;margin-bottom:18px}
+
+  h1{font-size:24px;text-align:center;color:#333;margin-bottom:6px}
+  .subtitle{font-size:14px;color:#666;text-align:center;margin-bottom:14px}
 
   .form-group{margin-bottom:12px}
   label{display:block;margin-bottom:6px;color:#333;font-weight:600}
@@ -37,44 +36,41 @@
     color:white;font-weight:700;font-size:16px;cursor:pointer;margin-top:8px;
   }
 
-  /* roleta */
-  .roleta-wrapper{width:380px;height:380px;margin:18px auto;position:relative}
+  /* ROLET A (pizza) */
+  .roleta-wrapper{width:420px;height:420px;margin:16px auto;position:relative}
   .seta{
-    position:absolute;top:-34px;left:50%;transform:translateX(-50%);
-    width:0;height:0;border-left:26px solid transparent;border-right:26px solid transparent;border-top:52px solid #ffd700;z-index:60;
-    filter:drop-shadow(0 6px 12px rgba(0,0,0,0.25));
-  }
-  .roleta{
-    width:100%;height:100%;border-radius:50%;position:relative;
-    background:#fff;
-    box-shadow:0 0 0 12px #D4AF37,0 0 0 16px #333,0 18px 40px rgba(0,0,0,0.25);
-    overflow:hidden;
-  }
-  /* animação aplicada no inner */
-  .roleta-inner{
-    width:100%;height:100%;position:absolute;top:0;left:0;border-radius:50%;
-    transform-origin:center center;
-    transition:transform 8s cubic-bezier(.17,.67,.12,.99);
+    position:absolute;top:-36px;left:50%;transform:translateX(-50%);
+    width:0;height:0;border-left:28px solid transparent;border-right:28px solid transparent;
+    border-top:56px solid #ffd700;z-index:80;filter:drop-shadow(0 6px 12px rgba(0,0,0,0.25));
   }
 
-  /* fatia simples 4x (alternadas) */
-  .fatia{
-    position:absolute;
-    width:50%;
-    height:50%;
-    top:50%;
-    left:50%;
-    transform-origin:0 0; /* pivot em canto para construir a fatia corretamente */
-    clip-path:polygon(0 0,100% 0,0 100%);
+  .roleta{
+    width:100%;height:100%;border-radius:50%;position:relative;overflow:visible;
+    display:flex;align-items:center;justify-content:center;
   }
-  .fatia-text{
+
+  /* === usamos conic-gradient para criar as fatias (pizza) ===
+     "from -90deg" faz o início do gradiente apontar para o topo (seta) */
+  .roleta-inner{
+    width:92%;height:92%;border-radius:50%;
+    overflow:visible; /* labels ficarão visíveis */
+    transition: transform 8s cubic-bezier(.17,.67,.12,.99);
+    transform-origin:center center;
+    /* fundo definido dinamicamente via JS para suportar N items, mas padrão 4 */
+    background: conic-gradient(from -90deg, #FFFFFF 0deg 90deg, #DC143C 90deg 180deg, #FFFFFF 180deg 270deg, #DC143C 270deg 360deg);
+    box-shadow: 0 8px 30px rgba(0,0,0,.12), inset 0 0 0 8px rgba(0,0,0,.06);
+    position:relative;
+  }
+
+  /* Labels que ficam dentro das fatias.
+     Cada label é posicionado no centro radial da fatia (com JS). */
+  .slice-label{
     position:absolute;
-    top:20%;
-    left:-5%;
-    width:140px;
-    text-align:center;
-    font-weight:700;
-    font-size:20px;
+    left:50%;
+    top:50%;
+    transform-origin:center center;
+    font-weight:800;
+    font-size:18px;
     white-space:nowrap;
     pointer-events:none;
     color:#000;
@@ -82,18 +78,17 @@
 
   .centro{
     position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
-    width:100px;height:100px;border-radius:50%;
+    width:110px;height:110px;border-radius:50%;
     background:radial-gradient(circle,#FFD700 0%,#FFA500 60%,#FF8C00 100%);
-    display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;border:3px solid #D4AF37;z-index:70;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;border:3px solid #D4AF37;z-index:85;cursor:pointer;
     box-shadow:0 0 0 6px rgba(0,0,0,0.12);
     font-size:18px;
   }
   .centro.girando{opacity:.8;pointer-events:none}
 
-  .resultado{display:none;text-align:center}
+  .resultado{display:none;text-align:center;margin-top:8px}
   .resultado.show{display:block}
-
-  .resultado-premio{font-size:40px;color:#667eea;font-weight:800;margin:12px 0}
+  .resultado-premio{font-size:40px;color:#667eea;font-weight:800;margin:8px 0}
 </style>
 </head>
 <body>
@@ -158,14 +153,15 @@
   </div>
 
 <script>
-/* ====== CONFIG ====== */
-const DURATION_MS = 8000; // 8s (mude se quiser)
-const NAMES = ['CANETA','COPO','ALMOFADA','FONE']; // ordem usada nas fatias
+/* ===== CONFIG ===== */
+const DURATION_MS = 8000; // 8s - ajuste se quiser
+const NAMES = ['CANETA','COPO','ALMOFADA','FONE']; // ordem das fatias (sentido horário)
 const SLICE_COUNT = NAMES.length;
 const ANGLE = 360 / SLICE_COUNT;
+const RADIUS = 0.38 * 420; // aproximação do raio em px para posicionar labels (ajuste fino)
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzojpuOhfwH1TfSKe0ITynGAVVa4xVQwwneCUvw1A5wqdbf-jhag_CvFHyaBxCWObYgsw/exec';
 
-/* ====== ESTADO ====== */
+/* ===== Estado ===== */
 let premios = {
   'Caneta':{total:600,distribuidos:0,peso:30},
   'Copo':{total:100,distribuidos:0,peso:3},
@@ -173,14 +169,14 @@ let premios = {
   'Fone':{total:50,distribuidos:0,peso:1}
 };
 let formData = {};
-let girando = false;
-let currentRotation = 0; // graus acumulados
+let spinning = false;
+let currentRotation = 0; // acumulado em graus
 
-/* ====== INIT ====== */
-window.onload = ()=>{ criarRoleta(); aplicarMascaras(); };
+/* ===== Init ===== */
+window.onload = ()=>{ buildWheel(); applyMasks(); };
 
-/* máscaras simples */
-function aplicarMascaras(){
+/* === Máscaras simples === */
+function applyMasks(){
   document.getElementById('telefone').addEventListener('input', e=>{
     let v = e.target.value.replace(/\D/g,'');
     if(v.length>2) v = v.replace(/^(\d{2})(\d)/,'($1) $2');
@@ -194,37 +190,54 @@ function aplicarMascaras(){
   });
 }
 
-/* ====== CRIAR FATIAS ====== */
-function criarRoleta(){
-  const container = document.getElementById('roletaInner');
-  container.innerHTML = '';
+/* ===== Build wheel: conic-gradient + labels ===== */
+function buildWheel(){
+  const inner = document.getElementById('roletaInner');
+  inner.innerHTML='';
+
+  // set background using conic-gradient from -90deg so 0 starts at top (seta)
+  // alternating white/red slices
+  const stops = [];
   for(let i=0;i<SLICE_COUNT;i++){
-    const fat = document.createElement('div');
-    fat.className = 'fatia';
-    // alterna cores: índice par branco, ímpar vermelho
-    fat.style.background = (i % 2 === 0) ? '#FFFFFF' : '#DC143C';
-    // posiciona a fatia girada i*ANGLE
-    fat.style.transform = `rotate(${i*ANGLE}deg)`;
-    // texto horizontal no interior
-    const txt = document.createElement('div');
-    txt.className = 'fatia-text';
-    txt.textContent = NAMES[i];
-    fat.appendChild(txt);
-    container.appendChild(fat);
+    const start = i * ANGLE;
+    const end = start + ANGLE;
+    const color = (i % 2 === 0) ? '#FFFFFF' : '#DC143C';
+    stops.push(`${color} ${start}deg ${end}deg`);
+  }
+  inner.style.background = `conic-gradient(from -90deg, ${stops.join(', ')})`;
+
+  // create labels positioned at middle of each slice
+  const rect = inner.getBoundingClientRect();
+  // we will position labels relative to center; use fixed pixel distance for translate
+  const distance = Math.min(rect.width, rect.height) * 0.32; // ajustável (0.32)
+  for(let i=0;i<SLICE_COUNT;i++){
+    const label = document.createElement('div');
+    label.className = 'slice-label';
+    label.textContent = NAMES[i];
+
+    // center angle for slice, but because gradient starts from -90deg,
+    // the visual center (degrees from +X) is: -90deg + (i*ANGLE + ANGLE/2)
+    // to place label, we rotate by that angle and then translate radially outward,
+    // then rotate back to keep text horizontal.
+    const sliceCenter = -90 + (i * ANGLE) + (ANGLE/2); // degrees
+    // CSS transform: rotate(sliceCenter) translateY(-distance) rotate(-sliceCenter)
+    // rotate positive goes clockwise in CSS (angles in deg)
+    label.style.transform = `rotate(${sliceCenter}deg) translateY(-${distance}px) rotate(${-sliceCenter}deg)`;
+    // ensure labels are above wheel visuals
+    label.style.zIndex = 70;
+    inner.appendChild(label);
   }
 }
 
-/* ====== VALIDAÇÃO E AVANÇAR ====== */
-function validar(id,errId){
+/* ===== Validations and advance ===== */
+function validar(id, errId){
   const el = document.getElementById(id);
   const msg = document.getElementById(errId);
   if(!el.value || !el.value.trim()){
-    el.classList.add('erro');
-    if(msg) msg.style.display='block';
+    el.classList.add('erro'); if(msg) msg.style.display='block';
     return false;
   }
-  el.classList.remove('erro');
-  if(msg) msg.style.display='none';
+  el.classList.remove('erro'); if(msg) msg.style.display='none';
   return true;
 }
 
@@ -243,11 +256,11 @@ function avancarParaRoleta(){
   document.getElementById('saudacao').textContent = 'Boa sorte, ' + formData.nome.split(' ')[0] + '!';
 }
 
-/* ====== SORTEIO PONDERADO ====== */
-function sortearPremio(){
+/* ===== Weighted draw ===== */
+function drawPrize(){
   const avail = Object.entries(premios).filter(([k,v]) => v.distribuidos < v.total);
-  if(avail.length===0) return null;
-  const totalPeso = avail.reduce((s,[k,v])=>s+v.peso,0);
+  if(avail.length === 0) return null;
+  const totalPeso = avail.reduce((s,[k,v]) => s + v.peso, 0);
   let r = Math.random()*totalPeso;
   for(const [nome,info] of avail){
     r -= info.peso;
@@ -256,93 +269,87 @@ function sortearPremio(){
   return avail[0][0];
 }
 
-/* ====== GIRO (correção de sinal e cálculo) ====== */
+/* ===== Spin (calculates angle to align chosen slice with the top arrow) ===== */
 function girarRoleta(){
-  if(girando) return;
-  const premio = sortearPremio();
-  if(!premio) { alert('Todos os prêmios foram distribuídos.'); return; }
+  if(spinning) return;
 
-  // Guardar o escolhido (garante consistência)
-  const chosen = premio;
-  // índice do slice no array NAMES (upper/lower seguros)
-  const idx = NAMES.findIndex(n => n.toUpperCase() === chosen.toUpperCase());
-  if(idx === -1){
-    console.error('Índice do prêmio não encontrado:', chosen);
-    return;
-  }
+  const prize = drawPrize();
+  if(!prize){ alert('Todos os prêmios foram distribuídos'); return; }
 
-  girando = true;
+  // find index in NAMES (case-insensitive)
+  const idx = NAMES.findIndex(n => n.toUpperCase() === prize.toUpperCase());
+  if(idx === -1){ console.error('Índice não encontrado para', prize); return; }
+
+  spinning = true;
   const btn = document.getElementById('btnGirar');
   btn.classList.add('girando');
   btn.textContent = '...';
 
-  // quantas voltas extras (aleatório leve)
+  // random extra spins to make it dynamic
   const spins = 4 + Math.floor(Math.random()*3); // 4..6
-  // calculamos o ângulo do centro da fatia: index*ANGLE + ANGLE/2
-  const centerAngle = idx * ANGLE + (ANGLE/2);
+  // Because conic-gradient has "from -90deg", the slice center (in degrees) relative to +X is:
+  // sliceCenter = -90 + (idx*ANGLE + ANGLE/2)
+  const sliceCenterDeg = -90 + (idx * ANGLE) + (ANGLE / 2);
 
-  // A GRANDE CORREÇÃO: aplicamos rotação negativa para que a fatia idx venha ao topo
-  // targetRotation (em graus, positivo) -> usamos sinal negativo para transform
-  // formula: rotationToApply = spins*360 + centerAngle; (usamos negativo ao aplicar)
-  // mas queremos acumular a rotação relativa ao currentRotation
-  const additional = spins*360 + centerAngle;
+  // We want that slice center to align to top (0deg vertical). When we rotate the wheel,
+  // using transform: rotate(angle), positive rotates clockwise visually.
+  // We'll accumulate a finalRotation (positive) and then apply rotate(-finalRotation) to spin clockwise.
+  const additional = spins * 360 + sliceCenterDeg; // positive amount to bring center to top
   const finalRotation = currentRotation + additional;
 
-  // Aplicar transformação com sinal NEGATIVO (gira no sentido horário visual)
   const inner = document.getElementById('roletaInner');
-  // definimos a transição pelo JS também para garantir duração sincronizada
   inner.style.transition = `transform ${DURATION_MS}ms cubic-bezier(.17,.67,.12,.99)`;
 
-  // apply with negative sign
-  requestAnimationFrame(()=>{
+  // apply with negative sign so visual rotates clockwise
+  requestAnimationFrame(() => {
     inner.style.transform = `rotate(${-finalRotation}deg)`;
   });
 
-  // atualizamos currentRotation (em valor positivo acumulado)
+  // update accumulated rotation
   currentRotation = finalRotation % 360;
 
-  console.log('SORTEADO (escolhido):', chosen, 'idx=', idx, 'centerAngle=', centerAngle, 'finalRotation=', finalRotation);
+  // debug log (pode remover)
+  console.log('SORTEADO:', prize, 'idx=', idx, 'sliceCenterDeg=', sliceCenterDeg, 'finalRotation=', finalRotation);
 
-  // espera o fim da animação
-  setTimeout(()=>{
-    // incrementa contagem
-    premios[chosen].distribuidos++;
+  // after animation finish:
+  setTimeout(() => {
+    // increment count
+    premios[prize].distribuidos++;
 
-    // enviar para google sheets (sem-cors)
+    // attempt to send (no-cors)
     try{
       fetch(SCRIPT_URL, {
         method:'POST',
         mode:'no-cors',
         headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({...formData, premio: chosen, data: new Date().toLocaleString('pt-BR')})
+        body: JSON.stringify({...formData, premio: prize, data: new Date().toLocaleString('pt-BR')})
       });
     }catch(e){ console.log('Erro envio:', e); }
 
-    // mostrar resultado com o mesmo prêmio escolhido (garantia)
+    // show result (prize chosen)
     document.getElementById('roletaArea').style.display='none';
-    const res = document.getElementById('resultado');
-    document.getElementById('premioGanho').textContent = chosen;
-    res.classList.add('show');
+    document.getElementById('premioGanho').textContent = prize;
+    document.getElementById('resultado').classList.add('show');
 
-    // reset botão
     btn.classList.remove('girando');
     btn.textContent = 'GIRAR';
-
-    girando = false;
-  }, DURATION_MS + 60); // pequeno buffer
+    spinning = false;
+  }, DURATION_MS + 60);
 }
 
-/* ====== REINICIAR ====== */
+/* ===== Restart ===== */
 function reiniciar(){
   document.getElementById('formulario').style.display='block';
   document.getElementById('roletaArea').style.display='none';
   document.getElementById('resultado').classList.remove('show');
 
-  // limpar campos
   ['nome','telefone','cep','rua','numero'].forEach(id => document.getElementById(id).value = '');
   document.querySelectorAll('.msg-erro').forEach(e => e.style.display='none');
   document.querySelectorAll('input').forEach(i => i.classList.remove('erro'));
 }
+
+/* Rebuild labels if window resizes (keep positions good) */
+window.addEventListener('resize', ()=>{ buildWheel(); });
 </script>
 </body>
 </html>
