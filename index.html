@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roleta da Sorte</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .roleta-container {
+            text-align: center;
+        }
+        
+        .roleta-wrapper {
+            position: relative;
+            width: 380px;
+            height: 380px;
+            margin: 30px auto;
+        }
+        
+        .seta {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 30px solid transparent;
+            border-right: 30px solid transparent;
+            border-top: 60px solid #ffd700;
+            z-index: 10;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
+        }
+        
+        .roleta {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            background: radial-gradient(circle at center, #8B4513 0%, #654321 50%, #8B4513 100%);
+            box-shadow: 
+                0 0 0 15px #D4AF37,
+                0 0 0 18px #8B4513,
+                0 15px 50px rgba(0,0,0,0.5),
+                inset 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .roleta-inner {
+            width: 90%;
+            height: 90%;
+            border-radius: 50%;
+            position: absolute;
+            top: 5%;
+            left: 5%;
+            overflow: hidden;
+            box-shadow: inset 0 0 30px rgba(0,0,0,0.4);
+        }
+        
+        .fatia {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: 100% 100%;
+            clip-path: polygon(0% 0%, 100% 0%, 100% 100%);
+        }
+        
+        .fatia-conteudo {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform-origin: 50% 100%;
+        }
+        
+        .fatia-text {
+            font-weight: bold;
+            font-size: 20px;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            letter-spacing: 1px;
+        }
+        
+        .centro {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, #FFD700 0%, #FFA500 50%, #FF8C00 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 
+                0 0 0 8px #8B4513,
+                0 8px 20px rgba(0,0,0,0.5),
+                inset 0 -3px 8px rgba(0,0,0,0.3),
+                inset 0 3px 8px rgba(255,255,255,0.3);
+            border: 3px solid #D4AF37;
+            z-index: 5;
+            transition: all 0.2s;
+            font-size: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .centro:hover {
+            transform: translate(-50%, -50%) scale(1.05);
+            box-shadow: 
+                0 0 0 8px #8B4513,
+                0 10px 25px rgba(0,0,0,0.6),
+                inset 0 -3px 8px rgba(0,0,0,0.3),
+                inset 0 3px 8px rgba(255,255,255,0.4);
+        }
+        
+        .centro:active {
+            transform: translate(-50%, -50%) scale(0.98);
+        }
+        
+        .centro.girando {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+        
+        .resultado-container {
+            text-align: center;
+        }
+        
+        .resultado-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        
+        .resultado-titulo {
+            font-size: 32px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .resultado-premio {
+            font-size: 48px;
+            color: #667eea;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        
+        .resultado-msg {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 18px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Etapa 1: Formulario -->
+        <div id="formulario">
+            <h1>Roleta da Sorte</h1>
+            <p class="subtitle">Preencha seus dados e concorra a premios!</p>
+            
+            <div class="form-group">
+                <label>Nome Completo *</label>
+                <input type="text" id="nome" placeholder="Digite seu nome completo">
+            </div>
+            
+            <div class="form-group">
+                <label>Telefone *</label>
+                <input type="tel" id="telefone" placeholder="(00) 00000-0000">
+            </div>
+            
+            <div class="form-group">
+                <label>Endereco *</label>
+                <textarea id="endereco" placeholder="Digite seu endereco completo"></textarea>
+            </div>
+            
+            <button class="btn" onclick="avancarParaRoleta()">Girar a Roleta!</button>
+        </div>
+        
+        <!-- Etapa 2: Roleta -->
+        <div id="roletaDiv" class="hidden roleta-container">
+            <h1 id="saudacao">Boa sorte!</h1>
+            
+            <div class="roleta-wrapper">
+                <div class="seta"></div>
+                <div class="roleta">
+                    <div class="roleta-inner" id="roletaInner"></div>
+                </div>
+                <div class="centro" id="btnGirar" onclick="girarRoleta()">GIRAR</div>
+            </div>
+        </div>
+        
+        <!-- Etapa 3: Resultado -->
+        <div id="resultado" class="hidden resultado-container">
+            <div class="resultado-icon">🎉</div>
+            <h2 class="resultado-titulo">Parabens!</h2>
+            <p class="resultado-msg">Voce ganhou:</p>
+            <div class="resultado-premio" id="premioGanho"></div>
+            <p class="resultado-msg">Dirija-se ao balcao para retirar seu premio!</p>
+            <button class="btn" onclick="reiniciar()">Proximo Participante</button>
+        </div>
+    </div>
+
+    <script>
+        let premios = {
+            'Bone': { total: 10, distribuidos: 0, peso: 1 },
+            'Caneta': { total: 600, distribuidos: 0, peso: 10 },
+            'Fone': { total: 50, distribuidos: 0, peso: 1 },
+            'Copo': { total: 20, distribuidos: 0, peso: 2 }
+        };
+        
+        let formData = {};
+        let girando = false;
+        let rotacaoAtual = 0;
+        
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyuaIWsExzpnnFkJGjv2RUHPhivh1iTCexvv3IM2G1Y72oiIW3DeL40GfPxkFYchdjj/exec';
+        
+        window.onload = function() {
+            criarRoleta();
+        };
+        
+        function criarRoleta() {
+            const container = document.getElementById('roletaInner');
+            const nomes = Object.keys(premios);
+            const numFatias = nomes.length;
+            const anguloFatia = 360 / numFatias;
+            
+            nomes.forEach((nome, i) => {
+                const fatia = document.createElement('div');
+                fatia.className = 'fatia';
+                
+                const cor = i % 2 === 0 ? '#DC143C' : '#F5DEB3';
+                const corTexto = i % 2 === 0 ? '#FFF' : '#8B0000';
+                
+                fatia.style.background = `linear-gradient(135deg, ${cor} 0%, ${cor === '#DC143C' ? '#8B0000' : '#DEB887'} 100%)`;
+                fatia.style.transform = `rotate(${anguloFatia * i}deg) skewY(${90 - anguloFatia}deg)`;
+                
+                const conteudo = document.createElement('div');
+                conteudo.className = 'fatia-conteudo';
+                conteudo.style.transform = `skewY(${-(90 - anguloFatia)}deg) rotate(${anguloFatia / 2}deg)`;
+                
+                const texto = document.createElement('div');
+                texto.className = 'fatia-text';
+                texto.textContent = nome;
+                texto.style.color = corTexto;
+                texto.style.transform = `translateY(-80px)`;
+                
+                conteudo.appendChild(texto);
+                fatia.appendChild(conteudo);
+                container.appendChild(fatia);
+            });
+        }
+        
+        function avancarParaRoleta() {
+            const nome = document.getElementById('nome').value.trim();
+            const telefone = document.getElementById('telefone').value.trim();
+            const endereco = document.getElementById('endereco').value.trim();
+            
+            if (!nome || !telefone || !endereco) {
+                alert('Por favor, preencha todos os campos!');
+                return;
+            }
+            
+            formData = { nome, telefone, endereco };
+            
+            document.getElementById('formulario').classList.add('hidden');
+            document.getElementById('roletaDiv').classList.remove('hidden');
+            document.getElementById('saudacao').textContent = 'Boa sorte, ' + nome.split(' ')[0] + '!';
+        }
+        
+        function sortearPremio() {
+            const disponiveis = Object.entries(premios)
+                .filter(([_, info]) => info.distribuidos < info.total);
+            
+            if (disponiveis.length === 0) {
+                alert('Todos os premios foram distribuidos!');
+                return null;
+            }
+            
+            const pesoTotal = disponiveis.reduce((acc, [_, info]) => acc + info.peso, 0);
+            let aleatorio = Math.random() * pesoTotal;
+            
+            for (const [nome, info] of disponiveis) {
+                aleatorio -= info.peso;
+                if (aleatorio <= 0) {
+                    return nome;
+                }
+            }
+            
+            return disponiveis[0][0];
+        }
+        
+        function girarRoleta() {
+            if (girando) return;
+            
+            const premio = sortearPremio();
+            if (!premio) return;
+            
+            girando = true;
+            const btnGirar = document.getElementById('btnGirar');
+            btnGirar.classList.add('girando');
+            btnGirar.textContent = '...';
+            
+            const nomes = Object.keys(premios);
+            const indice = nomes.indexOf(premio);
+            const anguloBase = 360 / nomes.length;
+            const anguloAlvo = anguloBase * indice;
+            const voltas = 5 + Math.floor(Math.random() * 3);
+            const rotacaoFinal = rotacaoAtual + (360 * voltas) + (360 - anguloAlvo) + (anguloBase / 2);
+            
+            const roletaInner = document.getElementById('roletaInner');
+            roletaInner.style.transform = `rotate(${rotacaoFinal}deg)`;
+            rotacaoAtual = rotacaoFinal % 360;
+            
+            setTimeout(() => {
+                premios[premio].distribuidos++;
+                enviarParaGoogleSheets(premio);
+                
+                document.getElementById('roletaDiv').classList.add('hidden');
+                document.getElementById('resultado').classList.remove('hidden');
+                document.getElementById('premioGanho').textContent = premio;
+                
+                girando = false;
+            }, 4000);
+        }
+        
+        function enviarParaGoogleSheets(premio) {
+            const dados = {
+                nome: formData.nome,
+                telefone: formData.telefone,
+                endereco: formData.endereco,
+                premio: premio,
+                data: new Date().toLocaleString('pt-BR')
+            };
+            
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(dados)
+            }).catch(err => console.log('Erro ao enviar'));
+            
+            console.log('Participante:', dados);
+        }
+        
+        function reiniciar() {
+            document.getElementById('nome').value = '';
+            document.getElementById('telefone').value = '';
+            document.getElementById('endereco').value = '';
+            
+            document.getElementById('resultado').classList.add('hidden');
+            document.getElementById('formulario').classList.remove('hidden');
+            
+            const btnGirar = document.getElementById('btnGirar');
+            btnGirar.classList.remove('girando');
+            btnGirar.textContent = 'GIRAR';
+        }
+    </script>
+</body>
+</html>
