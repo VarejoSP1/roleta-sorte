@@ -69,29 +69,8 @@
         width:100%; height:100%;
         border-radius:50%;
         transition:transform 8s cubic-bezier(.17,.67,.12,.99);
-        position:relative; overflow:hidden;
+        position:relative;
         box-shadow:0 0 0 12px #d4af37, 0 0 0 16px #333;
-        transform: rotate(-90deg);
-    }
-
-    .slice {
-        position:absolute;
-        width:100%; height:100%;
-        transform-origin:center center;
-    }
-
-    .slice-label {
-        position:absolute;
-        left:50%; top:50%;
-        transform-origin:center center;
-        font-size:16px; font-weight:800;
-        white-space:nowrap;
-        pointer-events:none;
-        color:#FFF;
-        max-width:120px;
-        text-align:center;
-        overflow:hidden;
-        transform: rotate(90deg);
     }
 
     .centro {
@@ -172,7 +151,7 @@
     <div class="roleta-wrapper">
         <div class="seta"></div>
 
-        <div class="roleta-inner" id="roletaInner"></div>
+        <canvas id="roletaCanvas" width="380" height="380"></canvas>
 
         <div id="btnGirar" class="centro" onclick="girarRoleta()">GIRAR</div>
     </div>
@@ -206,6 +185,7 @@ const PREMIOS = [
 let currentRotation = 0;
 let spinning = false;
 let formData = {};
+let canvas, ctx;
 
 /* MÁSCARAS */
 telefone.addEventListener("input", e => {
@@ -221,58 +201,51 @@ cep.addEventListener("input", e => {
     e.target.value = v;
 });
 
-/* MONTA A ROLETA COM FATIAS DE PIZZA */
-function buildWheel() {
-    const inner = document.getElementById("roletaInner");
-    inner.innerHTML = "";
+/* DESENHA A ROLETA NO CANVAS */
+function drawWheel(rotation = 0) {
+    if (!ctx) return;
     
-    let currentAngle = 0;
-    const totalProbability = PREMIOS.reduce((sum, p) => sum + p.probabilidade, 0);
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = 190;
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    ctx.rotate((rotation * Math.PI) / 180);
+    
+    let startAngle = 0;
+    const totalProb = PREMIOS.reduce((sum, p) => sum + p.probabilidade, 0);
     
     PREMIOS.forEach((premio, i) => {
-        // Calcular ângulo da fatia baseado na probabilidade
-        const sliceAngle = (premio.probabilidade / totalProbability) * 360;
+        const sliceAngle = (premio.probabilidade / totalProb) * 2 * Math.PI;
         
-        // Criar fatia
-        const slice = document.createElement("div");
-        slice.className = "slice";
-        slice.style.backgroundColor = premio.cor;
-        slice.style.transform = `rotate(${currentAngle}deg)`;
+        // Desenhar fatia
+        ctx.beginPath();
+        ctx.arc(0, 0, radius, startAngle, startAngle + sliceAngle);
+        ctx.lineTo(0, 0);
+        ctx.fillStyle = premio.cor;
+        ctx.fill();
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 3;
+        ctx.stroke();
         
-        // Criar o clip-path correto para fatia de pizza
-        const endAngle = sliceAngle;
-        const x2 = 50 + 50 * Math.sin(endAngle * Math.PI / 180);
-        const y2 = 50 - 50 * Math.cos(endAngle * Math.PI / 180);
+        // Desenhar texto
+        ctx.save();
+        ctx.rotate(startAngle + sliceAngle / 2);
+        ctx.textAlign = "center";
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 20px Arial";
+        ctx.shadowColor = "rgba(0,0,0,0.8)";
+        ctx.shadowBlur = 4;
+        ctx.fillText(premio.nome.toUpperCase(), radius * 0.65, 5);
+        ctx.restore();
         
-        slice.style.clipPath = `polygon(50% 50%, 50% 0%, ${x2}% ${y2}%)`;
-        
-        // Criar label
-        const label = document.createElement("div");
-        label.className = "slice-label";
-        label.textContent = premio.nome.toUpperCase();
-        label.style.color = "#FFF";
-        label.style.fontWeight = "900";
-        label.style.textShadow = "2px 2px 4px rgba(0,0,0,0.8)";
-        
-        // Posicionar label no centro da fatia
-        const labelAngle = currentAngle + (sliceAngle / 2);
-        const radius = 120;
-        const x = radius * Math.cos((labelAngle - 90) * Math.PI / 180);
-        const y = radius * Math.sin((labelAngle - 90) * Math.PI / 180);
-        
-        label.style.transform = `
-            translate(calc(-50% + ${x}px), calc(-50% + ${y}px))
-            rotate(${labelAngle}deg)
-        `;
-        
-        slice.appendChild(label);
-        inner.appendChild(slice);
-        
-        currentAngle += sliceAngle;
+        startAngle += sliceAngle;
     });
+    
+    ctx.restore();
 }
-
-window.onload = buildWheel;
 
 /* VALIDAÇÃO SIMPLES - SEM MENSAGENS DE ERRO VISÍVEIS */
 function validarCampos() {
@@ -315,7 +288,6 @@ function validarCampos() {
 /* AVANÇAR PARA ROLETA */
 function avancarParaRoleta() {
     if (!validarCampos()) {
-        // Não mostra mensagem, apenas não avança
         return;
     }
 
@@ -332,6 +304,11 @@ function avancarParaRoleta() {
     roletaArea.style.display = "block";
 
     saudacao.textContent = "Boa sorte, " + nome.value.split(" ")[0] + "!";
+    
+    // Inicializar canvas
+    canvas = document.getElementById("roletaCanvas");
+    ctx = canvas.getContext("2d");
+    drawWheel(0);
 }
 
 /* SORTEIO BASEADO NA PROBABILIDADE */
@@ -347,7 +324,7 @@ function drawPrize() {
         }
     }
     
-    return PREMIOS[0].nome; // fallback
+    return PREMIOS[0].nome;
 }
 
 /* GIRO DA ROLETA */
@@ -357,51 +334,72 @@ function girarRoleta() {
     const premioEscolhido = drawPrize();
     const premioIndex = PREMIOS.findIndex(p => p.nome === premioEscolhido);
     
-    // Calcular ângulo de cada prêmio acumulado
-    const totalProbability = PREMIOS.reduce((sum, p) => sum + p.probabilidade, 0);
+    // Calcular ângulo do prêmio
+    const totalProb = PREMIOS.reduce((sum, p) => sum + p.probabilidade, 0);
     let cumulativeAngle = 0;
     for (let i = 0; i < premioIndex; i++) {
-        cumulativeAngle += (PREMIOS[i].probabilidade / totalProbability) * 360;
+        cumulativeAngle += (PREMIOS[i].probabilidade / totalProb) * 360;
     }
     
-    // Calcular posição central da fatia sorteada
-    const premioAngle = (PREMIOS[premioIndex].probabilidade / totalProbability) * 360;
+    const premioAngle = (PREMIOS[premioIndex].probabilidade / totalProb) * 360;
     const targetAngle = cumulativeAngle + (premioAngle / 2);
     
     spinning = true;
     btnGirar.classList.add("girando");
     btnGirar.textContent = "...";
 
-    // 5 voltas completas + ângulo para parar na fatia escolhida
+    // 5 voltas + ângulo alvo
     const spins = 5;
-    const finalRotation = currentRotation + (spins * 360) + (360 - targetAngle) + 90;
+    const finalRotation = currentRotation + (spins * 360) + (360 - targetAngle);
+    
+    // Animar a roleta
+    const startTime = Date.now();
+    const startRotation = currentRotation;
+    
+    function animate() {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / DURATION_MS, 1);
+        
+        // Easing cubic
+        const eased = progress < 0.5 
+            ? 4 * progress * progress * progress 
+            : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+        
+        const rotation = startRotation + (finalRotation - startRotation) * eased;
+        drawWheel(rotation);
+        
+        if (progress < 1) {
+            requestAnimationFrame(animate);
+        } else {
+            currentRotation = finalRotation % 360;
+            finalizarGiro(premioEscolhido);
+        }
+    }
+    
+    animate();
+}
 
-    roletaInner.style.transform = `rotate(${-finalRotation}deg)`;
-    currentRotation = finalRotation % 360;
+function finalizarGiro(premioEscolhido) {
+    // Enviar dados para Google Sheets
+    fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            ...formData,
+            premio: premioEscolhido,
+            data: new Date().toLocaleString("pt-BR")
+        })
+    });
 
-    setTimeout(() => {
-        // Enviar dados para Google Sheets
-        fetch(SCRIPT_URL, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                ...formData,
-                premio: premioEscolhido,
-                data: new Date().toLocaleString("pt-BR")
-            })
-        });
+    premioGanho.textContent = premioEscolhido;
 
-        premioGanho.textContent = premioEscolhido;
+    roletaArea.style.display = "none";
+    resultado.classList.add("show");
 
-        roletaArea.style.display = "none";
-        resultado.classList.add("show");
-
-        btnGirar.classList.remove("girando");
-        btnGirar.textContent = "GIRAR";
-        spinning = false;
-
-    }, DURATION_MS + 200);
+    btnGirar.classList.remove("girando");
+    btnGirar.textContent = "GIRAR";
+    spinning = false;
 }
 
 /* REINICIAR */
