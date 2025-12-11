@@ -118,11 +118,9 @@
         color:#667eea; margin:20px 0;
     }
     
-    .msg-erro {
-        color: #ff0000;
-        font-size: 14px;
-        margin-top: 5px;
-        display: none;
+    .campo-invalido {
+        border-color: #ff0000 !important;
+        background-color: #fff5f5;
     }
 </style>
 </head>
@@ -133,37 +131,37 @@
 <!-- FORMULÁRIO -->
 <div id="formulario">
     <h1>Roleta da Sorte</h1>
+    <p class="subtitle">Preencha seus dados para girar!</p>
 
     <div class="form-group">
         <label>Nome *</label>
         <input id="nome" />
-   
-    
+    </div>
 
     <div class="form-group">
         <label>Telefone *</label>
         <input id="telefone" maxlength="15" />
-      
+    </div>
 
     <div class="form-group">
         <label>CEP *</label>
         <input id="cep" maxlength="9" />
-      
+    </div>
 
     <div class="form-group">
         <label>Rua *</label>
         <input id="rua" />
-        <div id="errRua" class="msg-erro">Preencha a rua</div>
     </div>
 
     <div class="form-group">
         <label>Número *</label>
         <input id="numero" />
-       
+    </div>
 
     <div class="form-group">
         <label>Complemento (opcional)</label>
-      
+        <input id="complemento" />
+    </div>
 
     <button class="btn" onclick="avancarParaRoleta()">Girar a Roleta!</button>
 </div>
@@ -272,29 +270,50 @@ function buildWheel() {
 
 window.onload = buildWheel;
 
-/* VALIDAÇÃO */
-function validar(id, msg) {
-    let el = document.getElementById(id);
-    let msgEl = document.getElementById(msg);
-
-    if (!el.value.trim()) {
-        msgEl.style.display = "block";
-        return false;
-    }
-
-    msgEl.style.display = "none";
-    return true;
+/* VALIDAÇÃO SIMPLES - SEM MENSAGENS DE ERRO VISÍVEIS */
+function validarCampos() {
+    const campos = [
+        { id: "nome", valido: false },
+        { id: "telefone", valido: false },
+        { id: "cep", valido: false },
+        { id: "rua", valido: false },
+        { id: "numero", valido: false }
+    ];
+    
+    let todosValidos = true;
+    
+    campos.forEach(campo => {
+        const elemento = document.getElementById(campo.id);
+        const valor = elemento.value.trim();
+        
+        if (!valor) {
+            elemento.classList.add("campo-invalido");
+            todosValidos = false;
+        } else {
+            elemento.classList.remove("campo-invalido");
+        }
+    });
+    
+    return todosValidos;
 }
 
-/* AVANÇAR */
+/* REMOVER ESTILO DE ERRO AO DIGITAR */
+[nome, telefone, cep, rua, numero].forEach(input => {
+    if (input) {
+        input.addEventListener("input", function() {
+            if (this.value.trim()) {
+                this.classList.remove("campo-invalido");
+            }
+        });
+    }
+});
+
+/* AVANÇAR PARA ROLETA */
 function avancarParaRoleta() {
-    if (
-        !validar("nome","errNome") |
-        !validar("telefone","errTel") |
-        !validar("cep","errCep") |
-        !validar("rua","errRua") |
-        !validar("numero","errNum")
-    ) return;
+    if (!validarCampos()) {
+        // Não mostra mensagem, apenas não avança
+        return;
+    }
 
     formData = {
         nome: nome.value,
@@ -385,16 +404,21 @@ function reiniciar() {
     resultado.classList.remove("show");
     formulario.style.display = "block";
 
+    // Limpar campos
     nome.value = "";
     telefone.value = "";
     cep.value = "";
     rua.value = "";
     numero.value = "";
     complemento.value = "";
+    
+    // Remover estilos de erro
+    [nome, telefone, cep, rua, numero].forEach(campo => {
+        campo.classList.remove("campo-invalido");
+    });
 }
 
 </script>
 
 </body>
 </html>
-
