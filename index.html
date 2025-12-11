@@ -30,8 +30,6 @@ body{
     box-shadow:0 20px 50px rgba(0,0,0,.3);
 }
 
-/* FORM */
-
 h1{
     text-align:center;
     color:#333;
@@ -86,8 +84,6 @@ input.erro{
     margin-top:10px;
 }
 
-/* ROLETA */
-
 .roleta-wrapper{
     width:380px;
     height:380px;
@@ -120,39 +116,11 @@ input.erro{
         0 15px 30px rgba(0,0,0,.5);
 }
 
-.roleta-inner{
+.roleta-canvas{
     width:100%;
     height:100%;
     border-radius:50%;
-    position:relative;
-    overflow:hidden;
-    transition:transform 8s cubic-bezier(.17,.67,.12,.99);
 }
-
-/* FATIAS TRIANGULARES — MODELO ORIGINAL */
-
-.fatia{
-    position:absolute;
-    width:50%;
-    height:50%;
-    left:50%;
-    top:50%;
-    transform-origin:0 0;
-    clip-path:polygon(0 0,100% 0,0 100%);
-}
-
-.fatia-text{
-    position:absolute;
-    left:20px;
-    top:20px;
-    font-weight:bold;
-    font-size:18px;
-    color:#000;
-    white-space:nowrap;
-    transform-origin:left top;
-}
-
-/* BOTÃO CENTRAL */
 
 .centro{
     position:absolute;
@@ -172,9 +140,12 @@ input.erro{
     font-weight:bold;
     cursor:pointer;
     z-index:20;
+    box-shadow:0 4px 8px rgba(0,0,0,0.3);
 }
 
-/* RESULTADO */
+.centro:hover{
+    transform:translate(-50%,-50%) scale(1.05);
+}
 
 .resultado{
     text-align:center;
@@ -253,7 +224,7 @@ input.erro{
         <div class="seta"></div>
 
         <div class="roleta">
-            <div id="roletaInner" class="roleta-inner"></div>
+            <canvas id="roletaCanvas" class="roleta-canvas" width="380" height="380"></canvas>
         </div>
 
         <div id="btnGirar" class="centro" onclick="girarRoleta()">GIRAR</div>
@@ -277,17 +248,23 @@ input.erro{
 /* GOOGLE SHEETS */
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzojpuOhfwH1TfSKe0ITynGAVVa4xVQwwneCUvw1A5wqdbf-jhag_CvFHyaBxCWObYgsw/exec";
 
-/* FATIAS — MODELO ORIGINAL */
-const PRIZES = ["CANETA","COPO","ALMOFADA","FONE"];
-const ANGLE = 90; /* 4 fatias = 360/4 */
+/* CONFIGURAÇÃO DA ROLETA */
+const PRIZES = [
+    {text: "CANETA", color: "#dc143c"},
+    {text: "COPO", color: "#fff"},
+    {text: "ALMOFADA", color: "#dc143c"},
+    {text: "CHAVEIRO", color: "#fff"}
+];
+
 let currentRotation = 0;
 let spinning = false;
+let canvas, ctx;
 
 let premios = {
-    "Caneta": {peso:85,total:600,distribuidos:0},
-    "Copo": {peso:5,total:100,distribuidos:0},
-    "Almofada": {peso:5,total:50,distribuidos:0},
-    "Fone": {peso:5,total:50,distribuidos:0}
+    "CANETA": {peso:90,total:600,distribuidos:0},
+    "COPO": {peso:3.33,total:100,distribuidos:0},
+    "ALMOFADA": {peso:3.33,total:50,distribuidos:0},
+    "CHAVEIRO": {peso:3.34,total:50,distribuidos:0}
 };
 
 /* Máscaras */
@@ -304,28 +281,58 @@ cep.addEventListener("input", e=>{
     e.target.value=v;
 });
 
-function buildWheel(){
-    const inner=document.getElementById("roletaInner");
-    inner.innerHTML="";
+/* Desenhar roleta com Canvas */
+function drawWheel() {
+    if (!canvas) {
+        canvas = document.getElementById('roletaCanvas');
+        ctx = canvas.getContext('2d');
+    }
 
-    PRIZES.forEach((p,i)=>{
-        let fatia=document.createElement("div");
-        fatia.className="fatia";
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = canvas.width / 2 - 10;
+    const sliceAngle = (2 * Math.PI) / PRIZES.length;
 
-        fatia.style.background = (i%2===0) ? "#fff" : "#dc143c";
-        fatia.style.transform = `rotate(${i*ANGLE}deg) skewY(-45deg)`;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        let txt=document.createElement("div");
-        txt.className="fatia-text";
-        txt.textContent=p;
-        txt.style.transform = `skewY(45deg) rotate(45deg)`;
+    // Desenhar cada fatia - A PRIMEIRA FATIA COMEÇA NO TOPO (-PI/2)
+    PRIZES.forEach((prize, index) => {
+        const startAngle = (index * sliceAngle) - (Math.PI / 2) + (currentRotation * Math.PI / 180);
+        const endAngle = startAngle + sliceAngle;
 
-        fatia.appendChild(txt);
-        inner.appendChild(fatia);
+        // Desenhar fatia
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+        ctx.closePath();
+        ctx.fillStyle = prize.color;
+        ctx.fill();
+        
+        // Borda da fatia
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // Texto
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(startAngle + sliceAngle / 2);
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = prize.color === '#fff' ? '#000' : '#fff';
+        ctx.font = 'bold 20px Arial';
+        ctx.shadowColor = 'rgba(0,0,0,0.3)';
+        ctx.shadowBlur = 2;
+        ctx.fillText(prize.text, radius * 0.65, 0);
+        ctx.restore();
     });
+
+    requestAnimationFrame(drawWheel);
 }
 
-window.onload = buildWheel;
+window.onload = () => {
+    drawWheel();
+};
 
 /* Validar */
 function validar(id,err){
@@ -369,54 +376,104 @@ function sortear(){
         r-=info.peso;
         if(r<=0) return nome;
     }
+    return "CANETA";
 }
 
-/* Giro */
+/* Giro com animação suave */
 function girarRoleta(){
     if(spinning) return;
 
-    let premio=sortear();
-    let idx=PRIZES.indexOf(premio.toUpperCase());
+    let premioSorteado = sortear();
+    let idx = PRIZES.findIndex(p => p.text === premioSorteado);
 
-    spinning=true;
-    btnGirar.classList.add("girando");
-    btnGirar.textContent="...";
+    spinning = true;
+    btnGirar.style.cursor = 'not-allowed';
+    btnGirar.textContent = "...";
 
-    let finalRotation = currentRotation + 720 + (360 - (idx*ANGLE) - ANGLE/2);
-    roletaInner.style.transform = `rotate(${finalRotation}deg)`;
-    currentRotation = finalRotation % 360;
+    const sliceAngle = 360 / PRIZES.length;
+    
+    // Centro da fatia sorteada (em graus)
+    const prizeCenterAngle = (idx * sliceAngle) + (sliceAngle / 2);
+    
+    // Voltas completas
+    const spins = 1800;
+    
+    // A seta aponta para -90° (topo do canvas)
+    // Queremos que o centro da fatia fique em -90° também
+    // Se a fatia está em prizeCenterAngle, precisamos girar: -90 - prizeCenterAngle
+    // Mas como começamos desenhando com offset -90, ajustamos:
+    const targetRotation = 360 - prizeCenterAngle;
+    
+    const finalRotation = spins + targetRotation;
+    
+    const startTime = Date.now();
+    const duration = 4000; // Reduzido de 8000 para 4000ms (4 segundos)
+    const startRotation = currentRotation;
 
-    setTimeout(()=>{
+    function animate() {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        currentRotation = startRotation + (finalRotation - startRotation) * easeOut;
 
-        premios[premio].distribuidos++;
+        if (progress < 1) {
+            requestAnimationFrame(animate);
+        } else {
+            currentRotation = finalRotation % 360;
+            
+            // Detectar qual fatia está no topo
+            // A seta aponta para 270° (ou -90°) no sistema de coordenadas
+            // Com a rotação aplicada, precisamos ver qual fatia está nessa posição
+            const normalizedRotation = ((currentRotation % 360) + 360) % 360;
+            
+            // Qual fatia está no topo (-90° ou 270°)?
+            // Posição da fatia = (índice * sliceAngle) + rotação - 90
+            // Queremos: posição = 270 (topo)
+            // Então: (idx * sliceAngle) + rotação - 90 = 270
+            // idx * sliceAngle = 360 - rotação
+            const angleAtTop = (360 - normalizedRotation) % 360;
+            const sliceAtTop = Math.floor(angleAtTop / sliceAngle) % PRIZES.length;
+            
+            const premioReal = PRIZES[sliceAtTop].text;
+            
+            console.log("Sorteado:", premioSorteado, "Parou em:", premioReal);
+            
+            finalizarGiro(premioReal);
+        }
+    }
 
-        fetch(SCRIPT_URL, {
-            method:"POST",
-            mode:"no-cors",
-            headers:{ "Content-Type":"application/json" },
-            body:JSON.stringify({
-                nome:nome.value,
-                telefone:telefone.value,
-                cep:cep.value,
-                rua:rua.value,
-                numero:numero.value,
-                complemento:complemento.value,
-                premio,
-                data:new Date().toLocaleString("pt-BR")
-            })
-        });
+    animate();
+}
 
-        premioGanho.textContent=premio;
+function finalizarGiro(premio) {
+    premios[premio].distribuidos++;
 
-        roletaArea.style.display="none";
-        resultado.classList.add("show");
+    fetch(SCRIPT_URL, {
+        method:"POST",
+        mode:"no-cors",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({
+            nome:nome.value,
+            telefone:telefone.value,
+            cep:cep.value,
+            rua:rua.value,
+            numero:numero.value,
+            complemento:complemento.value,
+            premio,
+            data:new Date().toLocaleString("pt-BR")
+        })
+    });
 
-        btnGirar.classList.remove("girando");
-        btnGirar.textContent="GIRAR";
+    premioGanho.textContent = premio;
 
-        spinning=false;
+    roletaArea.style.display = "none";
+    resultado.classList.add("show");
 
-    },8000);
+    btnGirar.style.cursor = 'pointer';
+    btnGirar.textContent = "GIRAR";
+
+    spinning = false;
 }
 
 /* Reiniciar */
