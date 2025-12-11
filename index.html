@@ -69,8 +69,16 @@
         width:100%; height:100%;
         border-radius:50%;
         transition:transform 8s cubic-bezier(.17,.67,.12,.99);
-        position:relative; overflow:visible;
+        position:relative; overflow:hidden;
         box-shadow:0 0 0 12px #d4af37, 0 0 0 16px #333;
+        transform: rotate(-90deg);
+    }
+
+    .slice {
+        position:absolute;
+        width:100%; height:100%;
+        transform-origin:center center;
+        clip-path: polygon(50% 50%, 50% 0%, 100% 0%);
     }
 
     .slice-label {
@@ -84,6 +92,7 @@
         max-width:120px;
         text-align:center;
         overflow:hidden;
+        transform: rotate(90deg);
     }
 
     .centro {
@@ -107,6 +116,13 @@
     .resultado-premio {
         font-size:42px; font-weight:900;
         color:#667eea; margin:20px 0;
+    }
+    
+    .msg-erro {
+        color: #ff0000;
+        font-size: 14px;
+        margin-top: 5px;
+        display: none;
     }
 </style>
 </head>
@@ -186,20 +202,18 @@
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzojpuOhfwH1TfSKe0ITynGAVVa4xVQwwneCUvw1A5wqdbf-jhag_CvFHyaBxCWObYgsw/exec";
 
 const DURATION_MS = 8000;
-const NAMES = ["CANETA","COPO","ALMOFADA","FONE"];
-const ANGLE = 360 / NAMES.length;
+
+/* PRÊMIOS COM PROBABILIDADES */
+const PREMIOS = [
+    { nome: "Caneta", probabilidade: 85, cor: "#FF6B6B", borda: "#FF4757" },
+    { nome: "Copo", probabilidade: 5, cor: "#4ECDC4", borda: "#45B7AA" },
+    { nome: "Almofada", probabilidade: 5, cor: "#FFD166", borda: "#FFC145" },
+    { nome: "Fone", probabilidade: 5, cor: "#6A0572", borda: "#5A0466" }
+];
 
 let currentRotation = 0;
 let spinning = false;
 let formData = {};
-
-/* PROBABILIDADES AJUSTADAS */
-let premios = {
-    "Caneta": { peso: 85, total: 600, distribuidos: 0 },
-    "Copo": { peso: 5, total: 100, distribuidos: 0 },
-    "Almofada": { peso: 5, total: 50, distribuidos: 0 },
-    "Fone": { peso: 5, total: 50, distribuidos: 0 }
-};
 
 /* MÁSCARAS */
 telefone.addEventListener("input", e => {
@@ -215,36 +229,49 @@ cep.addEventListener("input", e => {
     e.target.value = v;
 });
 
-/* MONTA A ROLETA */
+/* MONTA A ROLETA COM FATIAS DE PIZZA */
 function buildWheel() {
     const inner = document.getElementById("roletaInner");
     inner.innerHTML = "";
-
-    const slices = NAMES.map((_, i) => {
-        const start = i * ANGLE;
-        const end = start + ANGLE;
-        const color = i % 2 === 0 ? "#fff" : "#dc143c";
-        return `${color} ${start}deg ${end}deg`;
-    });
-
-    inner.style.background = `conic-gradient(from -90deg, ${slices.join(", ")})`;
-
-    const distance = 115;
-
-    NAMES.forEach((name, i) => {
+    
+    let currentAngle = 0;
+    const totalProbability = PREMIOS.reduce((sum, p) => sum + p.probabilidade, 0);
+    
+    PREMIOS.forEach((premio, i) => {
+        // Calcular ângulo da fatia baseado na probabilidade
+        const sliceAngle = (premio.probabilidade / totalProbability) * 360;
+        
+        // Criar fatia
+        const slice = document.createElement("div");
+        slice.className = "slice";
+        slice.style.backgroundColor = premio.cor;
+        slice.style.border = `2px solid ${premio.borda}`;
+        slice.style.transform = `rotate(${currentAngle}deg)`;
+        slice.style.clipPath = `polygon(50% 50%, 50% 0%, ${50 + 50 * Math.cos(sliceAngle * Math.PI / 180)}% ${50 - 50 * Math.sin(sliceAngle * Math.PI / 180)}%)`;
+        
+        // Criar label
         const label = document.createElement("div");
         label.className = "slice-label";
-        label.textContent = name;
-
-        const angle = -90 + (i * ANGLE) + (ANGLE / 2);
-
+        label.textContent = premio.nome.toUpperCase();
+        label.style.color = premio.probabilidade === 85 ? "#FFF" : "#000";
+        label.style.fontWeight = "900";
+        label.style.textShadow = premio.probabilidade === 85 ? "1px 1px 2px rgba(0,0,0,0.5)" : "none";
+        
+        // Posicionar label no centro da fatia
+        const labelAngle = currentAngle + (sliceAngle / 2);
+        const radius = 120;
+        const x = radius * Math.cos((labelAngle - 90) * Math.PI / 180);
+        const y = radius * Math.sin((labelAngle - 90) * Math.PI / 180);
+        
         label.style.transform = `
-            rotate(${angle}deg)
-            translateY(-${distance}px)
-            rotate(${-angle}deg)
+            translate(calc(-50% + ${x}px), calc(-50% + ${y}px))
+            rotate(${labelAngle}deg)
         `;
-
-        inner.appendChild(label);
+        
+        slice.appendChild(label);
+        inner.appendChild(slice);
+        
+        currentAngle += sliceAngle;
     });
 }
 
@@ -289,56 +316,64 @@ function avancarParaRoleta() {
     saudacao.textContent = "Boa sorte, " + nome.value.split(" ")[0] + "!";
 }
 
-/* SORTEIO */
+/* SORTEIO BASEADO NA PROBABILIDADE */
 function drawPrize() {
-    const disponiveis = Object.entries(premios)
-        .filter(([k,v]) => v.distribuidos < v.total);
-
-    let total = disponiveis.reduce((s,[k,v]) => s + v.peso, 0);
-
-    let r = Math.random() * total;
-
-    for (const [nome,info] of disponiveis) {
-        r -= info.peso;
-        if (r <= 0) return nome;
+    const totalProbability = PREMIOS.reduce((sum, p) => sum + p.probabilidade, 0);
+    let randomValue = Math.random() * totalProbability;
+    
+    let cumulative = 0;
+    for (const premio of PREMIOS) {
+        cumulative += premio.probabilidade;
+        if (randomValue <= cumulative) {
+            return premio.nome;
+        }
     }
+    
+    return PREMIOS[0].nome; // fallback
 }
 
-/* GIRO */
+/* GIRO DA ROLETA */
 function girarRoleta() {
     if (spinning) return;
 
-    const premio = drawPrize();
-    const idx = NAMES.indexOf(premio.toUpperCase());
-
+    const premioEscolhido = drawPrize();
+    const premioIndex = PREMIOS.findIndex(p => p.nome === premioEscolhido);
+    
+    // Calcular ângulo de cada prêmio acumulado
+    let cumulativeAngle = 0;
+    for (let i = 0; i < premioIndex; i++) {
+        cumulativeAngle += (PREMIOS[i].probabilidade / 100) * 360;
+    }
+    
+    // Calcular posição central da fatia sorteada
+    const premioAngle = (PREMIOS[premioIndex].probabilidade / 100) * 360;
+    const targetAngle = cumulativeAngle + (premioAngle / 2);
+    
     spinning = true;
     btnGirar.classList.add("girando");
     btnGirar.textContent = "...";
 
-    const sliceCenter = -90 + (idx * ANGLE) + (ANGLE / 2);
+    // 5 voltas completas + ângulo para parar na fatia escolhida
     const spins = 5;
-
-    const finalRotation = currentRotation + spins * 360 + sliceCenter;
+    const finalRotation = currentRotation + (spins * 360) + (360 - targetAngle) + 90;
 
     roletaInner.style.transform = `rotate(${-finalRotation}deg)`;
-
     currentRotation = finalRotation % 360;
 
     setTimeout(() => {
-        premios[premio].distribuidos++;
-
+        // Enviar dados para Google Sheets
         fetch(SCRIPT_URL, {
             method: "POST",
             mode: "no-cors",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 ...formData,
-                premio,
+                premio: premioEscolhido,
                 data: new Date().toLocaleString("pt-BR")
             })
         });
 
-        premioGanho.textContent = premio;
+        premioGanho.textContent = premioEscolhido;
 
         roletaArea.style.display = "none";
         resultado.classList.add("show");
