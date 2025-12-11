@@ -392,11 +392,12 @@
                 texto.className = 'fatia-text';
                 texto.textContent = nome;
                 texto.style.position = 'absolute';
-                texto.style.left = '50%';
-                texto.style.top = '30%';
-                texto.style.transform = `skewY(45deg) rotate(${45}deg) translateX(-50%)`;
-                texto.style.transformOrigin = 'center';
-                texto.style.whiteSpace = 'nowrap';
+                texto.style.width = '150px';
+                texto.style.textAlign = 'center';
+                texto.style.left = '60px';
+                texto.style.top = '40px';
+                texto.style.transform = `skewY(45deg) rotate(45deg)`;
+                texto.style.transformOrigin = 'center center';
                 
                 fatia.appendChild(texto);
                 container.appendChild(fatia);
