@@ -339,8 +339,8 @@ function validar(id,err){
 function avancarParaRoleta(){
     const ok =
         validar("nome","errNome") &
-        validar("telefone","errTel") &
         validar("email","errEmail") &
+        validar("telefone","errTel") &
         validar("cep","errCep") &
         validar("rua","errRua") &
         validar("numero","errNum");
@@ -421,8 +421,9 @@ function finalizarGiro(premio) {
             email:email.value,
             telefone:telefone.value,
             cep:cep.value,
-            endereco:rua.value + (complemento.value ? ', ' + complemento.value : ''),
+            rua:rua.value,
             numero:numero.value,
+            complemento:complemento.value,
             premio,
             data:new Date().toLocaleString("pt-BR")
         })
