@@ -243,13 +243,13 @@ input.erro{
 </div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzZnqJZacvtKyKnUrRL3IKme0fOeBFP0HZrQ7BX1GqiB6i67I97kDBVHY_EzV7wXjuh/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxbp-UIJFbI4s6AqGdMMQat11rJak7xT6UmoXcHaC8gVe05EM0rl7DzXSUqaFUQdI5NhA/exec";
 
 const PRIZES = [
-    {text: "CANETA", color: "#dc143c"},
+    {text: "FRISBEE", color: "#dc143c"},
     {text: "COPO", color: "#fff"},
     {text: "ALMOFADA", color: "#dc143c"},
-    {text: "CHAVEIRO", color: "#fff"}
+    // {text: "", color: "#fff"}
 ];
 
 let currentRotation = 0;
@@ -257,10 +257,10 @@ let spinning = false;
 let canvas, ctx;
 
 let premios = {
-    "CANETA": {peso:90,total:600,distribuidos:0},
-    "COPO": {peso:3.33,total:100,distribuidos:0},
-    "ALMOFADA": {peso:3.33,total:50,distribuidos:0},
-    "CHAVEIRO": {peso:3.34,total:50,distribuidos:0}
+    "FRISBEE": {peso:72,total:10,distribuidos:0},
+    "COPO": {peso:21,total:100,distribuidos:0},
+    "ALMOFADA": {peso:7,total:29,distribuidos:0},
+    // "CHAVEIRO": {peso:3.34,total:50,distribuidos:0}
 };
 
 telefone.addEventListener("input", e=>{
