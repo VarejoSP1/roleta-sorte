@@ -245,6 +245,7 @@ input.erro{
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz6FacdigpmbnODVtybUgN7yBwIaqmEUdAb2bdZoSX03Q7uOW1T39vgwKId_0onaElLEw/exec";
 
+
 const PRIZES = [
     {text: "FRISBEE", color: "#dc143c"},
     {text: "COPO", color: "#fff"},
@@ -414,20 +415,24 @@ function finalizarGiro(premio) {
     premios[premio].distribuidos++;
 
     fetch(SCRIPT_URL, {
-        method:"POST",
-        mode:"no-cors",
-        headers:{ "Content-Type":"application/json" },
-        body:JSON.stringify({
-            nome:nome.value,
-            email:email.value,
-            telefone:telefone.value,
-            cep:cep.value,
-            rua:rua.value,
-            numero:numero.value,
-            premio,
-            complemento:complemento.value,
-            data:new Date().toLocaleString("pt-BR")
-        })
+    method:"POST",
+    headers:{
+        "Content-Type":"application/json"
+    },
+    body:JSON.stringify({
+        nome:nome.value,
+        email:email.value,
+        telefone:telefone.value,
+        cep:cep.value,
+        rua:rua.value,
+        numero:numero.value,
+        complemento:complemento.value,
+        premio,
+        data:new Date().toLocaleString("pt-BR")
+    })
+        .then(r => r.text())
+        .then(console.log)
+        .catch(console.error);
     });
 
     premioGanho.textContent = premio;
