@@ -411,24 +411,37 @@ function girarRoleta(){
 }
 
 function finalizarGiro(premio) {
-    premios[premio].distribuidos++;
+    if (typeof premios !== 'undefined' && premios[premio]) {
+        premios[premio].distribuidos++;
+    }
+
+    const dadosEnvio = {
+        nome: document.getElementById('nome') ? document.getElementById('nome').value : '',
+        email: document.getElementById('email') ? document.getElementById('email').value : '',
+        telefone: document.getElementById('telefone') ? document.getElementById('telefone').value : '',
+        cep: document.getElementById('cep') ? document.getElementById('cep').value : '',
+        rua: document.getElementById('rua') ? document.getElementById('rua').value : '',
+        numero: document.getElementById('numero') ? document.getElementById('numero').value : '',
+        complemento: document.getElementById('complemento') ? document.getElementById('complemento').value : '',
+        premio: premio,
+        data: new Date().toLocaleString("pt-BR")
+    };
 
     fetch(SCRIPT_URL, {
-        method:"POST",
-        mode:"no-cors",
-        headers:{ "Content-Type":"application/json" },
-        body:JSON.stringify({
-            nome:nome.value,
-            email:email.value,
-            telefone:telefone.value,
-            cep:cep.value,
-            rua:rua.value,
-            numero:numero.value,
-            complemento:complemento.value,
-            premio,
-            data:new Date().toLocaleString("pt-BR")
-        })
+        method: "POST",
+        headers: { 
+            "Content-Type": "text/plain;charset=utf-8" 
+        },
+        body: JSON.stringify(dadosEnvio)
+    })
+    .then(response => response.text())
+    .then(resultado => {
+        console.log("Sucesso ao gravar:", resultado);
+    })
+    .catch(erro => {
+        console.error("Erro na requisição:", erro);
     });
+}
 
     premioGanho.textContent = premio;
 
