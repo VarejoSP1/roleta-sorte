@@ -244,6 +244,7 @@ input.erro{
 
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz6FacdigpmbnODVtybUgN7yBwIaqmEUdAb2bdZoSX03Q7uOW1T39vgwKId_0onaElLEw/exec";
+                    
 
 
 const PRIZES = [
@@ -428,7 +429,7 @@ function finalizarGiro(premio) {
         numero:numero.value,
         complemento:complemento.value,
         premio,
-        data:new Date().toLocaleString("pt-BR")
+        data: new Date().toISOString()
     })
         .then(r => r.text())
         .then(console.log)
