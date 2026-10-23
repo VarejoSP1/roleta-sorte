@@ -1,456 +1,1053 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Roleta da Sorte</title>
-<style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-body{
-    font-family:'Segoe UI',sans-serif;
-    background:linear-gradient(135deg,#8b0000,#b22222);
-    min-height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:20px;
-}
+    <title>Roleta da Sorte</title>
 
-.container{
-    width:520px;
-    background:white;
-    padding:30px;
-    border-radius:20px;
-    box-shadow:0 20px 50px rgba(0,0,0,.3);
-}
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-h1{
-    text-align:center;
-    color:#333;
-    margin-bottom:10px;
-}
+        body {
+            font-family: "Segoe UI", sans-serif;
+            background: linear-gradient(135deg, #8b0000, #b22222);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
 
-.subtitle{
-    text-align:center;
-    color:#666;
-    margin-bottom:20px;
-}
+        .container {
+            width: 520px;
+            max-width: 100%;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        }
 
-.form-group{
-    margin-bottom:15px;
-}
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+        }
 
-label{
-    font-weight:600;
-    color:#333;
-}
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+        }
 
-input{
-    width:100%;
-    padding:10px;
-    border:2px solid #ddd;
-    border-radius:10px;
-    font-size:16px;
-    margin-top:5px;
-}
+        .form-group {
+            margin-bottom: 15px;
+        }
 
-input.erro{
-    border-color:#dc3545;
-}
+        label {
+            font-weight: 600;
+            color: #333;
+        }
 
-.msg-erro{
-    color:#dc3545;
-    font-size:14px;
-    display:none;
-    margin-top:5px;
-}
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-top: 5px;
+        }
 
-.btn{
-    width:100%;
-    padding:15px;
-    background:linear-gradient(135deg,#8b0000,#b22222);
-    color:white;
-    border:none;
-    border-radius:12px;
-    font-size:18px;
-    font-weight:bold;
-    cursor:pointer;
-    margin-top:10px;
-}
+        input:focus {
+            outline: none;
+            border-color: #b22222;
+        }
 
-.roleta-wrapper{
-    width:380px;
-    height:380px;
-    margin:20px auto;
-    position:relative;
-}
+        input.erro {
+            border-color: #dc3545;
+        }
 
-.seta{
-    position:absolute;
-    top:-40px;
-    left:50%;
-    transform:translateX(-50%);
-    width:0;
-    height:0;
-    border-left:30px solid transparent;
-    border-right:30px solid transparent;
-    border-top:60px solid #ffd700;
-    z-index:10;
-}
+        .msg-erro {
+            color: #dc3545;
+            font-size: 14px;
+            display: none;
+            margin-top: 5px;
+        }
 
-.roleta{
-    width:100%;
-    height:100%;
-    border-radius:50%;
-    position:relative;
-    background:white;
-    box-shadow:
-        0 0 0 12px #D4AF37,
-        0 0 0 16px #333,
-        0 15px 30px rgba(0,0,0,.5);
-}
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #8b0000, #b22222);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
 
-.roleta-canvas{
-    width:100%;
-    height:100%;
-    border-radius:50%;
-}
+        .btn:hover {
+            opacity: 0.9;
+        }
 
-.centro{
-    position:absolute;
-    left:50%;
-    top:50%;
-    transform:translate(-50%,-50%);
-    width:110px;
-    height:110px;
-    border-radius:50%;
-    background:radial-gradient(circle,#FFD700,#FFA500,#FF8C00);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    border:4px solid #D4AF37;
-    font-size:20px;
-    color:white;
-    font-weight:bold;
-    cursor:pointer;
-    z-index:20;
-    box-shadow:0 4px 8px rgba(0,0,0,0.3);
-}
+        .roleta-wrapper {
+            width: 380px;
+            max-width: 100%;
+            aspect-ratio: 1;
+            margin: 50px auto 20px;
+            position: relative;
+        }
 
-.centro:hover{
-    transform:translate(-50%,-50%) scale(1.05);
-}
+        .seta {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 30px solid transparent;
+            border-right: 30px solid transparent;
+            border-top: 60px solid #ffd700;
+            z-index: 10;
+        }
 
-.resultado{
-    text-align:center;
-    display:none;
-}
+        .roleta {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            background: white;
+            box-shadow:
+                0 0 0 12px #d4af37,
+                0 0 0 16px #333,
+                0 15px 30px rgba(0, 0, 0, 0.5);
+        }
 
-.resultado.show{
-    display:block;
-}
+        .roleta-canvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
 
-.resultado-premio{
-    font-size:40px;
-    font-weight:900;
-    color:#667eea;
-    margin:20px 0;
-}
-</style>
+        .centro {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            background: radial-gradient(
+                circle,
+                #ffd700,
+                #ffa500,
+                #ff8c00
+            );
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 4px solid #d4af37;
+            font-size: 20px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 20;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            user-select: none;
+        }
+
+        .centro:hover {
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+
+        .resultado {
+            text-align: center;
+            display: none;
+        }
+
+        .resultado.show {
+            display: block;
+        }
+
+        .resultado-premio {
+            font-size: 40px;
+            font-weight: 900;
+            color: #dc143c;
+            margin: 20px 0;
+        }
+
+        .aviso {
+            text-align: center;
+            color: #dc3545;
+            font-size: 14px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .mensagem-envio {
+            margin-top: 15px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+
+            .roleta-wrapper {
+                width: 280px;
+            }
+
+            .centro {
+                width: 85px;
+                height: 85px;
+                font-size: 17px;
+            }
+        }
+    </style>
 </head>
+
 <body>
 
-<div class="container">
+    <div class="container">
 
-<!-- FORMULÁRIO -->
-<div id="formulario">
-    <h1>Roleta da Sorte</h1>
-    <p class="subtitle">Preencha seus dados para girar!</p>
+        <!-- FORMULÁRIO -->
+        <div id="formulario">
 
-    <div class="form-group">
-        <label>Nome *</label>
-        <input id="nome">
-        <div id="errNome" class="msg-erro">Preencha o nome</div>
-    </div>
+            <h1>Roleta da Sorte</h1>
 
-    <div class="form-group">
-        <label>Telefone *</label>
-        <input id="telefone" maxlength="15">
-        <div id="errTel" class="msg-erro">Preencha o telefone</div>
-    </div>
+            <p class="subtitle">
+                Preencha seus dados para girar!
+            </p>
 
-    <div class="form-group">
-        <label>E-mail Corporativo *</label>
-        <input id="email" type="email">
-        <div id="errEmail" class="msg-erro">Preencha o e-mail corporativo</div>
-    </div>
+            <div class="form-group">
+                <label for="nome">Nome *</label>
 
-    <div class="form-group">
-        <label>CEP *</label>
-        <input id="cep" maxlength="9">
-        <div id="errCep" class="msg-erro">Preencha o CEP</div>
-    </div>
+                <input
+                    id="nome"
+                    type="text"
+                    autocomplete="name"
+                >
 
-    <div class="form-group">
-        <label>Endereço *</label>
-        <input id="rua">
-        <div id="errRua" class="msg-erro">Preencha o endereço</div>
-    </div>
+                <div id="errNome" class="msg-erro">
+                    Preencha o nome
+                </div>
+            </div>
 
-    <div class="form-group">
-        <label>Número *</label>
-        <input id="numero">
-        <div id="errNum" class="msg-erro">Preencha o número</div>
-    </div>
+            <div class="form-group">
+                <label for="telefone">Telefone *</label>
 
-    <div class="form-group">
-        <label>Complemento (opcional)</label>
-        <input id="complemento">
-    </div>
-    
- <p style="text-align:center;color:#dc3545;font-size:14px;margin-bottom:15px;font-weight:600;">⚠️ Cadastros duplicados serão desconsiderados</p>
-    
-    <button class="btn" onclick="avancarParaRoleta()">Girar a Roleta!</button>
-</div>
-    
+                <input
+                    id="telefone"
+                    type="tel"
+                    maxlength="15"
+                    autocomplete="tel"
+                >
 
-<!-- ROLETA -->
-<div id="roletaArea" style="display:none">
-    <h1 id="saudacao" style="text-align:center;margin-bottom:10px"></h1>
+                <div id="errTel" class="msg-erro">
+                    Preencha o telefone
+                </div>
+            </div>
 
-    <div class="roleta-wrapper">
-        <div class="seta"></div>
-        <div class="roleta">
-            <canvas id="roletaCanvas" class="roleta-canvas" width="380" height="380"></canvas>
+            <div class="form-group">
+                <label for="email">
+                    E-mail corporativo *
+                </label>
+
+                <input
+                    id="email"
+                    type="email"
+                    autocomplete="email"
+                >
+
+                <div id="errEmail" class="msg-erro">
+                    Preencha um e-mail válido
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="cep">CEP *</label>
+
+                <input
+                    id="cep"
+                    type="text"
+                    maxlength="9"
+                    autocomplete="postal-code"
+                >
+
+                <div id="errCep" class="msg-erro">
+                    Preencha o CEP
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="rua">Endereço *</label>
+
+                <input
+                    id="rua"
+                    type="text"
+                    autocomplete="street-address"
+                >
+
+                <div id="errRua" class="msg-erro">
+                    Preencha o endereço
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="numero">Número *</label>
+
+                <input
+                    id="numero"
+                    type="text"
+                >
+
+                <div id="errNum" class="msg-erro">
+                    Preencha o número
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="complemento">
+                    Complemento (opcional)
+                </label>
+
+                <input
+                    id="complemento"
+                    type="text"
+                >
+            </div>
+
+            <p class="aviso">
+                ⚠️ Cadastros duplicados serão desconsiderados
+            </p>
+
+            <button
+                id="btnAvancar"
+                class="btn"
+                type="button"
+            >
+                Girar a Roleta!
+            </button>
+
         </div>
-        <div id="btnGirar" class="centro" onclick="girarRoleta()">GIRAR</div>
+
+        <!-- ROLETA -->
+        <div id="roletaArea" style="display: none;">
+
+            <h1
+                id="saudacao"
+                style="text-align: center; margin-bottom: 10px;"
+            ></h1>
+
+            <div class="roleta-wrapper">
+
+                <div class="seta"></div>
+
+                <div class="roleta">
+                    <canvas
+                        id="roletaCanvas"
+                        class="roleta-canvas"
+                        width="380"
+                        height="380"
+                    ></canvas>
+                </div>
+
+                <div id="btnGirar" class="centro">
+                    GIRAR
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- RESULTADO -->
+        <div id="resultado" class="resultado">
+
+            <h2>Parabéns!</h2>
+
+            <p>Você ganhou:</p>
+
+            <div
+                id="premioGanho"
+                class="resultado-premio"
+            ></div>
+
+            <p
+                style="
+                    font-size: 18px;
+                    color: #333;
+                    margin-top: 20px;
+                    font-weight: 600;
+                "
+            >
+                Apresente o celular para o promotor e retire seu brinde!
+            </p>
+
+            <div
+                id="mensagemEnvio"
+                class="mensagem-envio"
+            ></div>
+
+        </div>
+
     </div>
-</div>
 
-<!-- RESULTADO -->
-<div id="resultado" class="resultado">
-    <h2>Parabéns!</h2>
-    <p>Você ganhou:</p>
-    <div id="premioGanho" class="resultado-premio"></div>
-    <p style="font-size:18px;color:#333;margin-top:20px;font-weight:600;">Apresente o celular para o promotor e retire seu brinde!</p>
-</div>
+    <script>
+        /*
+         * Mantenha somente a URL dentro das aspas.
+         * Não coloque uma tag <a> nesta variável.
+         */
+        const SCRIPT_URL =
+            "https://script.google.com/macros/s/AKfycbz6FacdigpmbnODVtybUgN7yBwIaqmEUdAb2bdZoSX03Q7uOW1T39vgwKId_0onaElLEw/exec";
 
-</div>
+        const PRIZES = [
+            {
+                text: "FRISBEE",
+                color: "#dc143c"
+            },
+            {
+                text: "COPO",
+                color: "#ffffff"
+            },
+            {
+                text: "ALMOFADA",
+                color: "#23ebc3"
+            }
+        ];
 
-<script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz6FacdigpmbnODVtybUgN7yBwIaqmEUdAb2bdZoSX03Q7uOW1T39vgwKId_0onaElLEw/exec";
+        const premios = {
+            FRISBEE: {
+                peso: 60.79,
+                total: 200,
+                distribuidos: 0
+            },
+            COPO: {
+                peso: 30.40,
+                total: 100,
+                distribuidos: 0
+            },
+            ALMOFADA: {
+                peso: 8.81,
+                total: 29,
+                distribuidos: 0
+            }
+        };
 
+        let currentRotation = 0;
+        let spinning = false;
+        let canvas;
+        let ctx;
 
-const PRIZES = [
-    {text: "FRISBEE", color: "#dc143c"},
-    {text: "COPO", color: "#fff"},
-    {text: "ALMOFADA", color: "#23EBC3"},
-    // {text: "", color: "#fff"}
-];
+        /*
+         * Elementos da página
+         */
+        const formulario =
+            document.getElementById("formulario");
 
-let currentRotation = 0;
-let spinning = false;
-let canvas, ctx;
+        const roletaArea =
+            document.getElementById("roletaArea");
 
-let premios = {
-    "FRISBEE":  { peso: 60.79, total: 200, distribuidos: 0 },
-    "COPO":     { peso: 30.40, total: 100, distribuidos: 0 },
-    "ALMOFADA": { peso: 8.81,  total: 29,  distribuidos: 0 }
-};
+        const resultado =
+            document.getElementById("resultado");
 
-telefone.addEventListener("input", e=>{
-    let v=e.target.value.replace(/\D/g,'');
-    if(v.length>2) v=v.replace(/^(\d{2})(\d)/,"($1) $2");
-    if(v.length>7) v=v.replace(/(\d)(\d{4})$/,"$1-$2");
-    e.target.value=v;
-});
+        const saudacao =
+            document.getElementById("saudacao");
 
-cep.addEventListener("input", e=>{
-    let v=e.target.value.replace(/\D/g,'');
-    if(v.length>5) v=v.replace(/^(\d{5})(\d)/,"$1-$2");
-    e.target.value=v;
-});
+        const premioGanho =
+            document.getElementById("premioGanho");
 
-function drawWheel() {
-    if (!canvas) {
-        canvas = document.getElementById('roletaCanvas');
-        ctx = canvas.getContext('2d');
-    }
+        const mensagemEnvio =
+            document.getElementById("mensagemEnvio");
 
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-    const radius = canvas.width / 2 - 10;
-    const sliceAngle = (2 * Math.PI) / PRIZES.length;
+        const btnAvancar =
+            document.getElementById("btnAvancar");
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const btnGirar =
+            document.getElementById("btnGirar");
 
-    PRIZES.forEach((prize, index) => {
-        const startAngle = (index * sliceAngle) - (Math.PI / 2) + (currentRotation * Math.PI / 180);
-        const endAngle = startAngle + sliceAngle;
+        const nomeInput =
+            document.getElementById("nome");
 
-        ctx.beginPath();
-        ctx.moveTo(centerX, centerY);
-        ctx.arc(centerX, centerY, radius, startAngle, endAngle);
-        ctx.closePath();
-        ctx.fillStyle = prize.color;
-        ctx.fill();
-        
-        ctx.strokeStyle = '#333';
-        ctx.lineWidth = 3;
-        ctx.stroke();
+        const emailInput =
+            document.getElementById("email");
 
-        ctx.save();
-        ctx.translate(centerX, centerY);
-        ctx.rotate(startAngle + sliceAngle / 2);
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = prize.color === '#fff' ? '#000' : '#fff';
-        ctx.font = 'bold 20px Arial';
-        ctx.shadowColor = 'rgba(0,0,0,0.3)';
-        ctx.shadowBlur = 2;
-        ctx.fillText(prize.text, radius * 0.65, 0);
-        ctx.restore();
-    });
+        const telefoneInput =
+            document.getElementById("telefone");
 
-    requestAnimationFrame(drawWheel);
-}
+        const cepInput =
+            document.getElementById("cep");
 
-window.onload = () => {
-    drawWheel();
-};
+        const ruaInput =
+            document.getElementById("rua");
 
-function validar(id,err){
-    const el=document.getElementById(id);
-    const msg=document.getElementById(err);
+        const numeroInput =
+            document.getElementById("numero");
 
-    if(!el.value.trim()){
-        el.classList.add("erro");
-        msg.style.display="block";
-        return false;
-    }
-    el.classList.remove("erro");
-    msg.style.display="none";
-    return true;
-}
+        const complementoInput =
+            document.getElementById("complemento");
 
-function avancarParaRoleta(){
-    const ok =
-        validar("nome","errNome") &
-        validar("email","errEmail") &
-        validar("telefone","errTel") &
-        validar("cep","errCep") &
-        validar("rua","errRua") &
-        validar("numero","errNum");
+        /*
+         * Eventos dos botões
+         */
+        btnAvancar.addEventListener(
+            "click",
+            avancarParaRoleta
+        );
 
-    if(!ok) return;
+        btnGirar.addEventListener(
+            "click",
+            girarRoleta
+        );
 
-    formulario.style.display="none";
-    roletaArea.style.display="block";
-    saudacao.textContent="Boa sorte, "+nome.value.split(" ")[0]+"!";
-}
+        /*
+         * Máscara do telefone
+         */
+        telefoneInput.addEventListener(
+            "input",
+            function (evento) {
+                let valor = evento.target.value.replace(
+                    /\D/g,
+                    ""
+                );
 
-function sortear(){
-    let lista=Object.entries(premios).filter(([k,v])=>v.distribuidos < v.total);
-    let totalPeso=lista.reduce((t,[k,v])=>t+v.peso,0);
+                if (valor.length > 2) {
+                    valor = valor.replace(
+                        /^(\d{2})(\d)/,
+                        "($1) $2"
+                    );
+                }
 
-    let r=Math.random()*totalPeso;
+                if (valor.length > 7) {
+                    valor = valor.replace(
+                        /(\d)(\d{4})$/,
+                        "$1-$2"
+                    );
+                }
 
-    for(const [nome,info] of lista){
-        r-=info.peso;
-        if(r<=0) return nome;
-    }
-    return "CANETA";
-}
+                evento.target.value = valor;
+            }
+        );
 
-function girarRoleta(){
-    if(spinning) return;
+        /*
+         * Máscara do CEP
+         */
+        cepInput.addEventListener(
+            "input",
+            function (evento) {
+                let valor = evento.target.value.replace(
+                    /\D/g,
+                    ""
+                );
 
-    let premioSorteado = sortear();
-    let idx = PRIZES.findIndex(p => p.text === premioSorteado);
+                if (valor.length > 5) {
+                    valor = valor.replace(
+                        /^(\d{5})(\d)/,
+                        "$1-$2"
+                    );
+                }
 
-    spinning = true;
-    btnGirar.style.cursor = 'not-allowed';
-    btnGirar.textContent = "...";
+                evento.target.value = valor;
+            }
+        );
 
-    const sliceAngle = 360 / PRIZES.length;
-    const prizeCenterAngle = (idx * sliceAngle) + (sliceAngle / 2);
-    const spins = 1800;
-    const targetRotation = 360 - prizeCenterAngle;
-    const finalRotation = spins + targetRotation;
-    
-    const startTime = Date.now();
-    const duration = 4000;
-    const startRotation = currentRotation;
+        /*
+         * Validação padrão
+         */
+        function validar(idCampo, idErro) {
+            const campo =
+                document.getElementById(idCampo);
 
-    function animate() {
-        const elapsed = Date.now() - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        
-        const easeOut = 1 - Math.pow(1 - progress, 3);
-        currentRotation = startRotation + (finalRotation - startRotation) * easeOut;
+            const mensagem =
+                document.getElementById(idErro);
 
-        if (progress < 1) {
-            requestAnimationFrame(animate);
-        } else {
-            currentRotation = finalRotation % 360;
-            
-            const normalizedRotation = ((currentRotation % 360) + 360) % 360;
-            const angleAtTop = (360 - normalizedRotation) % 360;
-            const sliceAtTop = Math.floor(angleAtTop / sliceAngle) % PRIZES.length;
-            const premioReal = PRIZES[sliceAtTop].text;
-            
-            finalizarGiro(premioReal);
+            if (!campo.value.trim()) {
+                campo.classList.add("erro");
+                mensagem.style.display = "block";
+
+                return false;
+            }
+
+            campo.classList.remove("erro");
+            mensagem.style.display = "none";
+
+            return true;
         }
-    }
 
-    animate();
-}
+        /*
+         * Validação específica do e-mail
+         */
+        function validarEmail() {
+            const mensagem =
+                document.getElementById("errEmail");
 
-function finalizarGiro(premio) {
-    premios[premio].distribuidos++;
+            const email = emailInput.value.trim();
 
-    fetch(SCRIPT_URL, {
-    method:"POST",
-    headers:{
-        "Content-Type":"application/json"
-    },
-    body:JSON.stringify({
-        nome:nome.value,
-        email:email.value,
-        telefone:telefone.value,
-        cep:cep.value,
-        rua:rua.value,
-        numero:numero.value,
-        complemento:complemento.value,
-        premio,
-        data: new Date().toISOString()
-    })
-        .then(r => r.text())
-        .then(console.log)
-        .catch(console.error)
-    });
+            const formatoEmail =
+                /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    premioGanho.textContent = premio;
+            if (
+                !email ||
+                !formatoEmail.test(email)
+            ) {
+                emailInput.classList.add("erro");
+                mensagem.style.display = "block";
 
-    roletaArea.style.display = "none";
-    resultado.classList.add("show");
+                return false;
+            }
 
-    btnGirar.style.cursor = 'pointer';
-    btnGirar.textContent = "GIRAR";
+            emailInput.classList.remove("erro");
+            mensagem.style.display = "none";
 
-    spinning = false;
-}
-</script>
+            return true;
+        }
+
+        /*
+         * Avança para a roleta
+         */
+        function avancarParaRoleta() {
+            const nomeValido =
+                validar("nome", "errNome");
+
+            const telefoneValido =
+                validar("telefone", "errTel");
+
+            const emailValido =
+                validarEmail();
+
+            const cepValido =
+                validar("cep", "errCep");
+
+            const ruaValida =
+                validar("rua", "errRua");
+
+            const numeroValido =
+                validar("numero", "errNum");
+
+            const formularioValido =
+                nomeValido &&
+                telefoneValido &&
+                emailValido &&
+                cepValido &&
+                ruaValida &&
+                numeroValido;
+
+            if (!formularioValido) {
+                return;
+            }
+
+            const primeiroNome =
+                nomeInput.value
+                    .trim()
+                    .split(/\s+/)[0];
+
+            formulario.style.display = "none";
+            resultado.classList.remove("show");
+            roletaArea.style.display = "block";
+
+            saudacao.textContent =
+                "Boa sorte, " + primeiroNome + "!";
+
+            /*
+             * Redesenha a roleta após ela ficar visível.
+             */
+            drawWheel();
+        }
+
+        /*
+         * Desenha a roleta
+         */
+        function drawWheel() {
+            if (!canvas) {
+                canvas =
+                    document.getElementById(
+                        "roletaCanvas"
+                    );
+
+                ctx = canvas.getContext("2d");
+            }
+
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const radius = canvas.width / 2 - 10;
+
+            const sliceAngle =
+                (2 * Math.PI) / PRIZES.length;
+
+            ctx.clearRect(
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+            PRIZES.forEach(function (prize, index) {
+                const rotationRadians =
+                    currentRotation *
+                    Math.PI /
+                    180;
+
+                const startAngle =
+                    index * sliceAngle -
+                    Math.PI / 2 +
+                    rotationRadians;
+
+                const endAngle =
+                    startAngle + sliceAngle;
+
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+
+                ctx.arc(
+                    centerX,
+                    centerY,
+                    radius,
+                    startAngle,
+                    endAngle
+                );
+
+                ctx.closePath();
+
+                ctx.fillStyle = prize.color;
+                ctx.fill();
+
+                ctx.strokeStyle = "#333";
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                ctx.save();
+
+                ctx.translate(
+                    centerX,
+                    centerY
+                );
+
+                ctx.rotate(
+                    startAngle +
+                    sliceAngle / 2
+                );
+
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+
+                ctx.fillStyle =
+                    prize.color === "#ffffff"
+                        ? "#000000"
+                        : "#ffffff";
+
+                ctx.font = "bold 20px Arial";
+                ctx.shadowColor =
+                    "rgba(0, 0, 0, 0.3)";
+
+                ctx.shadowBlur = 2;
+
+                ctx.fillText(
+                    prize.text,
+                    radius * 0.65,
+                    0
+                );
+
+                ctx.restore();
+            });
+        }
+
+        /*
+         * Sorteia um prêmio com base no peso.
+         */
+        function sortear() {
+            const listaDisponivel =
+                Object.entries(premios).filter(
+                    function (item) {
+                        const dadosPremio = item[1];
+
+                        return (
+                            dadosPremio.distribuidos <
+                            dadosPremio.total
+                        );
+                    }
+                );
+
+            if (listaDisponivel.length === 0) {
+                return null;
+            }
+
+            const totalPeso =
+                listaDisponivel.reduce(
+                    function (total, item) {
+                        return total + item[1].peso;
+                    },
+                    0
+                );
+
+            let numeroSorteado =
+                Math.random() * totalPeso;
+
+            for (
+                const item of listaDisponivel
+            ) {
+                const nomePremio = item[0];
+                const dadosPremio = item[1];
+
+                numeroSorteado -=
+                    dadosPremio.peso;
+
+                if (numeroSorteado <= 0) {
+                    return nomePremio;
+                }
+            }
+
+            return listaDisponivel[
+                listaDisponivel.length - 1
+            ][0];
+        }
+
+        /*
+         * Inicia o giro da roleta.
+         */
+        function girarRoleta() {
+            if (spinning) {
+                return;
+            }
+
+            const premioSorteado =
+                sortear();
+
+            if (!premioSorteado) {
+                alert(
+                    "Todos os prêmios foram distribuídos."
+                );
+
+                return;
+            }
+
+            const indicePremio =
+                PRIZES.findIndex(
+                    function (prize) {
+                        return (
+                            prize.text ===
+                            premioSorteado
+                        );
+                    }
+                );
+
+            if (indicePremio === -1) {
+                console.error(
+                    "Prêmio não encontrado na roleta:",
+                    premioSorteado
+                );
+
+                return;
+            }
+
+            spinning = true;
+
+            btnGirar.style.cursor =
+                "not-allowed";
+
+            btnGirar.textContent = "...";
+
+            const anguloFatia =
+                360 / PRIZES.length;
+
+            /*
+             * O centro da primeira fatia começa em:
+             * metade do ângulo da fatia.
+             */
+            const centroPremio =
+                indicePremio * anguloFatia +
+                anguloFatia / 2;
+
+            /*
+             * A seta fica no topo da roleta.
+             */
+            const rotacaoParaPremio =
+                360 - centroPremio;
+
+            const voltasCompletas = 5 * 360;
+
+            const rotacaoInicial =
+                currentRotation;
+
+            const rotacaoFinal =
+                voltasCompletas +
+                rotacaoParaPremio;
+
+            const inicio = Date.now();
+            const duracao = 4000;
+
+            function animate() {
+                const tempoDecorrido =
+                    Date.now() - inicio;
+
+                const progresso =
+                    Math.min(
+                        tempoDecorrido / duracao,
+                        1
+                    );
+
+                const suavizacao =
+                    1 -
+                    Math.pow(
+                        1 - progresso,
+                        3
+                    );
+
+                currentRotation =
+                    rotacaoInicial +
+                    (
+                        rotacaoFinal -
+                        rotacaoInicial
+                    ) *
+                    suavizacao;
+
+                drawWheel();
+
+                if (progresso < 1) {
+                    requestAnimationFrame(
+                        animate
+                    );
+
+                    return;
+                }
+
+                currentRotation =
+                    rotacaoParaPremio % 360;
+
+                drawWheel();
+
+                finalizarGiro(
+                    premioSorteado
+                );
+            }
+
+            requestAnimationFrame(
+                animate
+            );
+        }
+
+        /*
+         * Exibe o resultado e envia os dados.
+         */
+        function finalizarGiro(premio) {
+            if (!premios[premio]) {
+                console.error(
+                    "Prêmio inválido:",
+                    premio
+                );
+
+                spinning = false;
+                return;
+            }
+
+            premios[premio].distribuidos++;
+
+            premioGanho.textContent =
+                premio;
+
+            roletaArea.style.display =
+                "none";
+
+            resultado.classList.add(
+                "show"
+            );
+
+            btnGirar.style.cursor =
+                "pointer";
+
+            btnGirar.textContent =
+                "GIRAR";
+
+            spinning = false;
+
+            enviarDados(premio);
+        }
+
+        /*
+         * Envia os dados para o Google Apps Script.
+         */
+        function enviarDados(premio) {
+            const dados = {
+                nome: nomeInput.value.trim(),
+                email: emailInput.value.trim(),
+                telefone:
+                    telefoneInput.value.trim(),
+                cep: cepInput.value.trim(),
+                rua: ruaInput.value.trim(),
+                numero:
+                    numeroInput.value.trim(),
+                complemento:
+                    complementoInput.value.trim(),
+                premio: premio,
+                data: new Date().toISOString()
+            };
+
+            mensagemEnvio.textContent =
+                "Registrando participação...";
+
+            mensagemEnvio.style.color =
+                "#666666";
+
+            /*
+             * text/plain evita uma requisição preflight
+             * para o Web App do Apps Script.
+             *
+             * O corpo continua contendo um JSON válido.
+             */
+            fetch(SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: {
+                    "Content-Type":
+                        "text/plain;charset=utf-8"
+                },
+                body: JSON.stringify(dados)
+            })
+                .then(function () {
+                    /*
+                     * Com no-cors, o navegador não permite
+                     * ler o conteúdo da resposta.
+                     */
+                    mensagemEnvio.textContent =
+                        "Participação enviada.";
+
+                    mensagemEnvio.style.color =
+                        "#198754";
+                })
+                .catch(function (erro) {
+                    console.error(
+                        "Erro ao enviar os dados:",
+                        erro
+                    );
+
+                    mensagemEnvio.textContent =
+                        "Não foi possível registrar a participação.";
+
+                    mensagemEnvio.style.color =
+                        "#dc3545";
+                });
+        }
+
+        /*
+         * Desenha a roleta ao carregar a página.
+         */
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
+                drawWheel();
+            }
+        );
+    </script>
 
 </body>
+
 </html>
-
-
-
-
-
