@@ -414,19 +414,23 @@
         const PRIZES = [
             {
                 text: "FRISBEE",
-                color: "#dc143c"
+                color: "#DC143C" // Vermelho principal
             },
             {
                 text: "COPO",
-                color: "#ffffff"
+                color: "#FF6B35" // Laranja vibrante
             },
             {
                 text: "ALMOFADA",
-                color: "#23ebc3"
+                color: "#FFC300" // Amarelo dourado
             },
             {
                 text: "CANETA",
-                color: "#1E3A8A"
+                color: "#6A0DAD" // Roxo intenso
+            },
+            {
+                text: "NÃO FOI DESSA VEZ",
+                color: "#111827" // Preto suave
             }
         ];
 
@@ -447,7 +451,12 @@
                 distribuidos: 0
             },
             CANETA: {
-                peso: 80,
+                peso: 70,
+                total: 95,
+                distribuidos: 0
+            },
+            NFOIDESSAVEZ: {
+                peso: 10,
                 total: 95,
                 distribuidos: 0
             }
@@ -754,17 +763,26 @@
                         ? "#000000"
                         : "#ffffff";
 
-                ctx.font = "bold 20px Arial";
+                ctx.font = "bold 16px Arial";
                 ctx.shadowColor =
                     "rgba(0, 0, 0, 0.3)";
 
                 ctx.shadowBlur = 2;
 
-                ctx.fillText(
-                    prize.text,
-                    radius * 0.65,
-                    0
-                );
+                if (prize.text === "NÃO FOI DESSA VEZ") {
+
+                    ctx.fillText("NÃO FOI", radius * 0.65, -8);
+                    ctx.fillText("DESSA VEZ", radius * 0.65 , 8);
+
+                } else {
+
+                    ctx.fillText(
+                        prize.text,
+                        radius * 0.65,
+                        0
+                    );
+
+};
 
                 ctx.restore();
             });
